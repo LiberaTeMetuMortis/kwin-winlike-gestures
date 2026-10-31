@@ -134,6 +134,43 @@ private Q_SLOTS:
         QCOMPARE(n.update({20, 20}), QPoint(0, 0));
     }
 
+    void triggerOnLift()
+    {
+        ActionTrigger t(ActionTrigger::Timing::OnLift, 80);
+        t.begin();
+        QVERIFY(!t.update(500)); // never mid-swipe
+        QVERIFY(t.end());
+    }
+
+    void triggerMidSwipe()
+    {
+        ActionTrigger t(ActionTrigger::Timing::MidSwipe, 80);
+        t.begin();
+        QVERIFY(!t.update(40));
+        QVERIFY(t.update(85)); // fires once the distance is reached...
+        QVERIFY(!t.update(200)); // ...only once...
+        QVERIFY(!t.end()); // ...and not again on lift
+    }
+
+    void triggerMidSwipeShortSwipeFiresNothing()
+    {
+        // A short swipe that never reaches the distance does nothing, so a
+        // flick can't trigger an action by accident.
+        ActionTrigger t(ActionTrigger::Timing::MidSwipe, 80);
+        t.begin();
+        QVERIFY(!t.update(50));
+        QVERIFY(!t.end());
+    }
+
+    void triggerRearmsOnBegin()
+    {
+        ActionTrigger t(ActionTrigger::Timing::MidSwipe, 80);
+        t.begin();
+        QVERIFY(t.update(100));
+        t.begin();
+        QVERIFY(t.update(100));
+    }
+
     void pinch()
     {
         PinchRecognizer p(0.2);

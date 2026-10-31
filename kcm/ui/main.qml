@@ -108,6 +108,33 @@ KCM.SimpleKCM {
             Kirigami.FormData.isSection: true
             Kirigami.FormData.label: i18nc("@title:group", "Sensitivity")
         }
+        QQC2.ComboBox {
+            readonly property var choices: [
+                { text: i18nc("@item:inlistbox", "When fingers lift"), value: "lift" },
+                { text: i18nc("@item:inlistbox", "Mid-swipe, after a set distance"), value: "midswipe" },
+            ]
+            Kirigami.FormData.label: i18nc("@label:listbox", "Run actions:")
+            enabled: kcm.pluginEnabled
+            textRole: "text"
+            model: choices
+            currentIndex: (kcm.revision, kcm.value("TriggerTiming") === "midswipe" ? 1 : 0)
+            onActivated: index => kcm.setValue("TriggerTiming", choices[index].value)
+        }
+        TuningSlider {
+            Kirigami.FormData.label: i18nc("@label:slider", "Mid-swipe distance:")
+            key: "TriggerDistance"
+            from: 40; to: 300; stepSize: 10
+            lowText: i18nc("@label:slider short distance", "Short")
+            highText: i18nc("@label:slider long distance", "Long")
+            enabled: kcm.pluginEnabled && (kcm.revision, kcm.value("TriggerTiming")) === "midswipe"
+        }
+        QQC2.Label {
+            Layout.preferredWidth: Kirigami.Units.gridUnit * 16
+            wrapMode: Text.Wrap
+            font: Kirigami.Theme.smallFont
+            enabled: kcm.pluginEnabled
+            text: i18nc("@info", "Mid-swipe runs the action while your fingers are still moving. The window switcher always follows your fingers.")
+        }
         TuningSlider {
             Kirigami.FormData.label: i18nc("@label:slider", "Swipe starts after:")
             key: "Threshold"

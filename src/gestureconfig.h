@@ -57,7 +57,8 @@ public:
     static QMap<QString, QString> defaults();
 
     // Applies overrides. Keys: "Threshold", "PinchThreshold", "SwitcherStep",
-    // "SwitcherStepVertical", and gesture keys.
+    // "SwitcherStepVertical", "TriggerTiming" (lift | midswipe),
+    // "TriggerDistance", and gesture keys.
     void load(const QMap<QString, QString> &overrides);
 
     Action action(GestureType type, int fingers, Direction direction, States states = {}) const;
@@ -71,6 +72,8 @@ public:
     qreal pinchThreshold() const { return m_pinchThreshold; }
     qreal switcherStep() const { return m_switcherStep; }
     qreal switcherStepVertical() const { return m_switcherStepVertical; }
+    ActionTrigger::Timing triggerTiming() const { return m_triggerTiming; }
+    qreal triggerDistance() const { return m_triggerDistance; }
 
 private:
     QHash<QString, Action> m_bindings;
@@ -79,6 +82,8 @@ private:
     qreal m_switcherStep = 100.0;
     // Touchpads are wider than tall, so up/down needs less travel by default.
     qreal m_switcherStepVertical = 60.0;
+    ActionTrigger::Timing m_triggerTiming = ActionTrigger::Timing::OnLift;
+    qreal m_triggerDistance = 80.0;
 };
 
 } // namespace WinLike

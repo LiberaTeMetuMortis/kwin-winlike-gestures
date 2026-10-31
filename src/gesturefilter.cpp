@@ -122,6 +122,8 @@ bool GestureFilter::swipeGestureBegin(KWin::PointerSwipeGestureBeginEvent *event
     m_swipe.begin(event->fingerCount);
     m_states = currentStates();
     m_swipeMode = modeFor(GestureType::Swipe, event->fingerCount);
+    m_swipeTrigger.configure(m_config->triggerTiming(), m_config->triggerDistance());
+    m_swipeTrigger.begin();
     qCDebug(WINLIKE) << "swipe begin, fingers:" << event->fingerCount << "states:" << m_states.toInt();
     return m_swipeMode == Mode::Owned;
 }
@@ -154,6 +156,9 @@ bool GestureFilter::swipeGestureUpdate(KWin::PointerSwipeGestureUpdateEvent *eve
             stepSwitcher(steps, event->time);
         }
     }
+    if (!m_switcherOpen && m_swipe.direction() != Direction::None && m_swipeTrigger.update(m_swipe.progress())) {
+        finish(GestureType::Swipe, m_swipeMode, m_swipe.fingers(), m_swipe.direction());
+    }
     return true;
 }
 
@@ -162,7 +167,7 @@ bool GestureFilter::swipeGestureEnd(KWin::PointerSwipeGestureEndEvent *event)
     const Mode mode = m_swipeMode;
     if (m_switcherOpen) {
         closeSwitcher(true, event->time);
-    } else {
+    } else if (m_swipeTrigger.end()) {
         finish(GestureType::Swipe, mode, m_swipe.fingers(), m_swipe.direction());
     }
     m_swipe.reset();
@@ -191,6 +196,9 @@ bool GestureFilter::pinchGestureBegin(KWin::PointerPinchGestureBeginEvent *event
     m_pinch.begin(event->fingerCount);
     m_states = currentStates();
     m_pinchMode = modeFor(GestureType::Pinch, event->fingerCount);
+    // A pinch has no travel distance: mid-swipe timing fires once it locks.
+    m_pinchTrigger.configure(m_config->triggerTiming(), 0);
+    m_pinchTrigger.begin();
     qCDebug(WINLIKE) << "pinch begin, fingers:" << event->fingerCount << "states:" << m_states.toInt();
     return m_pinchMode == Mode::Owned;
 }
@@ -209,13 +217,18 @@ bool GestureFilter::pinchGestureUpdate(KWin::PointerPinchGestureUpdateEvent *eve
             m_pinchMode = Mode::Ignored;
         }
     }
+    if (m_pinchMode == Mode::Owned && m_pinch.direction() != Direction::None && m_pinchTrigger.update(1)) {
+        finish(GestureType::Pinch, m_pinchMode, m_pinch.fingers(), m_pinch.direction());
+    }
     return m_pinchMode == Mode::Owned;
 }
 
 bool GestureFilter::pinchGestureEnd(KWin::PointerPinchGestureEndEvent *)
 {
     const Mode mode = m_pinchMode;
-    finish(GestureType::Pinch, mode, m_pinch.fingers(), m_pinch.direction());
+    if (m_pinchTrigger.end()) {
+        finish(GestureType::Pinch, mode, m_pinch.fingers(), m_pinch.direction());
+    }
     m_pinch.reset();
     m_pinchMode = Mode::Ignored;
     return mode == Mode::Owned;

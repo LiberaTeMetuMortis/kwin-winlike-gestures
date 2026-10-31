@@ -110,6 +110,39 @@ int SwitcherStepper::update(qreal delta)
     return steps;
 }
 
+ActionTrigger::ActionTrigger(Timing timing, qreal distance)
+    : m_timing(timing)
+    , m_distance(distance)
+{
+}
+
+void ActionTrigger::configure(Timing timing, qreal distance)
+{
+    m_timing = timing;
+    m_distance = distance;
+}
+
+void ActionTrigger::begin()
+{
+    m_fired = false;
+}
+
+bool ActionTrigger::update(qreal progress)
+{
+    if (m_timing != Timing::MidSwipe || m_fired || progress < m_distance) {
+        return false;
+    }
+    m_fired = true;
+    return true;
+}
+
+bool ActionTrigger::end()
+{
+    // Mid-swipe mode only acts once the distance is reached; a short swipe
+    // that never got there does nothing.
+    return m_timing == Timing::OnLift;
+}
+
 SwitcherNavigator::SwitcherNavigator(qreal horizontalStep, qreal verticalStep)
     : m_x(horizontalStep)
     , m_y(verticalStep)

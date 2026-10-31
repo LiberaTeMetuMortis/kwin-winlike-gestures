@@ -29,6 +29,8 @@ const QMap<QString, QString> s_tuningDefaults = {
     {QStringLiteral("PinchThreshold"), QStringLiteral("0.2")},
     {QStringLiteral("SwitcherStep"), QStringLiteral("100")},
     {QStringLiteral("SwitcherStepVertical"), QStringLiteral("60")},
+    {QStringLiteral("TriggerTiming"), QStringLiteral("lift")},
+    {QStringLiteral("TriggerDistance"), QStringLiteral("80")},
 };
 
 KConfigGroup kwinPlugins()

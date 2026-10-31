@@ -65,6 +65,31 @@ private:
 };
 
 /**
+ * Decides when a gesture's action runs: when the fingers lift (default), or
+ * mid-swipe as soon as the fingers have travelled `distance` along the
+ * locked direction. Either way it fires at most once per gesture.
+ */
+class ActionTrigger
+{
+public:
+    enum class Timing { OnLift, MidSwipe };
+
+    explicit ActionTrigger(Timing timing = Timing::OnLift, qreal distance = 80.0);
+
+    void configure(Timing timing, qreal distance);
+    void begin();
+    // Returns true when the action should run now (MidSwipe only).
+    bool update(qreal progress);
+    // Returns true when the action should run on lift.
+    bool end();
+
+private:
+    Timing m_timing;
+    qreal m_distance;
+    bool m_fired = false;
+};
+
+/**
  * Two-axis switcher navigation: horizontal travel becomes Left/Right steps,
  * vertical travel Up/Down steps. When one axis steps, the other axis's
  * partial travel is dropped, so the natural drift of a sideways slide never

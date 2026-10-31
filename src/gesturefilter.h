@@ -58,6 +58,8 @@ private:
     SwipeRecognizer m_swipe;
     PinchRecognizer m_pinch;
     SwitcherNavigator m_navigator;
+    ActionTrigger m_swipeTrigger;
+    ActionTrigger m_pinchTrigger;
     bool m_switcherOpen = false;
     // Snapshot taken when the current gesture began, used until it ends.
     States m_states;

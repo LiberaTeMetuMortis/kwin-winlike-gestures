@@ -118,6 +118,9 @@ void GestureConfig::load(const QMap<QString, QString> &overrides)
     m_pinchThreshold = positiveOr(merged.take(QStringLiteral("PinchThreshold")), 0.2);
     m_switcherStep = positiveOr(merged.take(QStringLiteral("SwitcherStep")), 100.0);
     m_switcherStepVertical = positiveOr(merged.take(QStringLiteral("SwitcherStepVertical")), 60.0);
+    m_triggerTiming = merged.take(QStringLiteral("TriggerTiming")).trimmed() == QLatin1String("midswipe") ? ActionTrigger::Timing::MidSwipe
+                                                                                                         : ActionTrigger::Timing::OnLift;
+    m_triggerDistance = positiveOr(merged.take(QStringLiteral("TriggerDistance")), 80.0);
 
     m_bindings.clear();
     for (auto it = merged.cbegin(); it != merged.cend(); ++it) {

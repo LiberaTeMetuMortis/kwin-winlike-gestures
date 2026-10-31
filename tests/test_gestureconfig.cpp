@@ -57,6 +57,19 @@ private Q_SLOTS:
         QCOMPARE(c.switcherStepVertical(), 60.0);
     }
 
+    void triggerTiming()
+    {
+        GestureConfig c;
+        QCOMPARE(c.triggerTiming(), ActionTrigger::Timing::OnLift);
+        QCOMPARE(c.triggerDistance(), 80.0);
+        c.load({{QStringLiteral("TriggerTiming"), QStringLiteral("midswipe")}, {QStringLiteral("TriggerDistance"), QStringLiteral("120")}});
+        QCOMPARE(c.triggerTiming(), ActionTrigger::Timing::MidSwipe);
+        QCOMPARE(c.triggerDistance(), 120.0);
+        // Unknown values fall back to the default.
+        c.load({{QStringLiteral("TriggerTiming"), QStringLiteral("sometimes")}});
+        QCOMPARE(c.triggerTiming(), ActionTrigger::Timing::OnLift);
+    }
+
     void verticalSwitcherStepOverride()
     {
         GestureConfig c;

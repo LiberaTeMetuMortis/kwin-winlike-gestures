@@ -29,8 +29,8 @@ cmake --build build -j"$(nproc)"
 echo "==> Testing"
 ctest --test-dir build --output-on-failure
 
-# Written by CMake: where this distro keeps Qt plugins.
-plugin_path=$(<build/plugin-path.txt)
+# Written by CMake: the installed files for this distro's layout, plugin first.
+plugin_path=$(head -n1 build/installed-files.txt)
 
 echo "==> Installing (sudo may ask for your password)"
 # Authenticate before touching anything, so a failed password never leaves

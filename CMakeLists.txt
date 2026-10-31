@@ -49,8 +49,14 @@ install(CODE "
         message(STATUS \"Unchanged: \${_dst}\")
     endif()
 ")
-# Lets install.sh find the installed plugin on any distro's layout.
-file(WRITE ${CMAKE_BINARY_DIR}/plugin-path.txt "${WINLIKE_PLUGIN_DIR}/winlikegestures.so")
+# Every installed file for this distro's layout, plugin first. install.sh and
+# uninstall.sh read it, so they never hardcode paths.
+file(WRITE ${CMAKE_BINARY_DIR}/installed-files.txt
+"${WINLIKE_PLUGIN_DIR}/winlikegestures.so
+${KDE_INSTALL_FULL_PLUGINDIR}/plasma/kcms/systemsettings/kcm_winlikegestures.so
+${KDE_INSTALL_FULL_APPDIR}/kcm_winlikegestures.desktop
+${KDE_INSTALL_FULL_LOGGINGCATEGORIESDIR}/kwin_winlike_gestures.categories
+")
 
 # Lets KDebugSettings switch the plugin's debug logging on and off.
 install(FILES kwin_winlike_gestures.categories DESTINATION ${KDE_INSTALL_LOGGINGCATEGORIESDIR})

@@ -2,10 +2,17 @@
 
 Windows-style touchpad gestures for KDE Plasma 6 on Wayland, configurable per gesture.
 
-Plasma ships a few built-in touchpad gestures, but you can't change them. This is a
-**KWin plugin**. It runs inside the compositor, sees touchpad gestures before KWin's own
-gesture bindings do, and maps them to actions you choose. The defaults copy a Windows
-precision touchpad.
+It comes in two parts:
+
+* **A KWin plugin** (a compiled C++ plugin, not a KWin script). It runs inside the
+  compositor, sees touchpad gestures *before* KWin's own gesture bindings do, and maps
+  them to actions you choose. Because it takes gestures over completely, Plasma's
+  built-in gestures can't fire alongside it.
+* **A System Settings page**, *Mouse & Touchpad → Touchpad Gestures*, where you turn the
+  plugin on or off and pick what each gesture does. No config file editing needed.
+
+Plasma ships a few built-in touchpad gestures, but you can't change them. The defaults
+here copy a Windows precision touchpad.
 
 Built and tested against **KWin / Plasma 6.8.1** on openSUSE Tumbleweed.
 
@@ -88,8 +95,14 @@ passes `Threshold` (default 30 units), it locks onto the dominant axis. The lock
 flips during a gesture. `PinchRecognizer` does the same for pinch scale (In below
 `1 - PinchThreshold`, Out above `1 + PinchThreshold`).
 
-Discrete actions (shortcuts, commands) run when the fingers **lift**, and only if a
-direction locked. A cancelled gesture does nothing.
+Discrete actions (shortcuts, commands) run when the fingers **lift** by default, and only
+if a direction locked. With `TriggerTiming=midswipe` they run **mid-swipe** instead, as
+soon as the fingers have travelled `TriggerDistance` (default 80 units) along the locked
+direction, so Overview opens while you're still swiping. A swipe that never gets that
+far does nothing. Pinches have no travel distance, so in mid-swipe mode they run as soon
+as the pinch direction locks. `ActionTrigger` makes sure an action fires at most once per
+gesture. A cancelled gesture does nothing. The window switcher follows the fingers live
+in either mode.
 
 ### Running actions
 
@@ -156,7 +169,11 @@ changing halfway through (e.g. Overview opening) doesn't switch actions mid-swip
 
 ```
 kde-gestures/
-├── CMakeLists.txt            build: core lib, plugin module, tests
+├── CMakeLists.txt            build: core lib, plugin module, tests, safe plugin install,
+│                             build/installed-files.txt (paths for the scripts)
+├── install.sh / uninstall.sh build+test+install / remove, run as your normal user
+├── packaging/                OBS spec file
+├── kwin_winlike_gestures.categories  debug-log switch for KDebugSettings
 ├── src/
 │   ├── main.cpp              WinLikeGesturesFactory: the KWin::PluginFactory entry point
 │   ├── metadata.json         plugin metadata (EnabledByDefault: false)
@@ -167,7 +184,8 @@ kde-gestures/
 │   ├── actionrunner.h/.cpp   runAction(): non-blocking kglobalaccel calls and commands
 │   ├── gestureconfig.h/.cpp  Action parsing, built-in defaults, overrides, state-specific
 │   │                         bindings, coverage queries
-│   ├── recognizer.h/.cpp     SwipeRecognizer, PinchRecognizer, SwitcherStepper
+│   ├── recognizer.h/.cpp     SwipeRecognizer, PinchRecognizer, SwitcherStepper,
+│   │                         SwitcherNavigator, ActionTrigger
 │   └── logging.h             WINLIKE logging category (kwin_winlike_gestures)
 ├── kcm/                      System Settings page (separate .so, runs in systemsettings)
 │   ├── CMakeLists.txt        kcmutils_add_qml_kcm; optional via -DBUILD_KCM=OFF
@@ -321,12 +339,16 @@ defaults.
 ### Uninstall
 
 ```sh
-kwriteconfig6 --file kwinrc --group Plugins --key winlikegesturesEnabled --delete
-sudo rm /usr/lib64/qt6/plugins/kwin/plugins/winlikegestures.so
-sudo rm /usr/lib64/qt6/plugins/plasma/kcms/systemsettings/kcm_winlikegestures.so
-sudo rm /usr/share/applications/kcm_winlikegestures.desktop
-rm ~/.config/kwinwinlikegesturesrc    # optional: your bindings
+./uninstall.sh            # keeps your gesture settings
+./uninstall.sh --purge    # also deletes ~/.config/kwinwinlikegesturesrc
 ```
+
+Run it as your normal user, **not** with `sudo`. It turns the plugin off in `kwinrc`,
+unloads it from the running KWin, and removes every installed file. CMake writes the
+list of installed paths for your distro to `build/installed-files.txt`, so nothing is
+hardcoded. Plasma's own gestures come back immediately; log out and back in to fully
+unload the old code. If you installed the OBS package instead, use
+`sudo zypper rm kwin-winlike-gestures`.
 
 ### Recovery if KWin crashes at login
 
@@ -348,6 +370,8 @@ kcm_winlikegestures`). It has:
   desktop, Window switcher, Next/Previous virtual desktop, Desktop grid, *Other KWin
   shortcut…* (picker listing every KWin shortcut), *Run command…*, Do nothing, Leave to
   Plasma or the app, and for state rows *Same as usual*.
+* **Run actions:** *When fingers lift* (default) or *Mid-swipe, after a set distance*,
+  with a slider for that distance.
 * Sliders for swipe threshold, switcher sideways step, switcher up/down step and pinch
   threshold.
 * **Defaults** restores the Windows-style bindings (it leaves the on/off switch alone).
@@ -390,6 +414,8 @@ Threshold=30        # swipe distance before a direction locks
 PinchThreshold=0.2  # scale change before a pinch locks
 SwitcherStep=100            # sideways travel per switcher step (Left/Right)
 SwitcherStepVertical=60     # up/down travel per switcher step (Up/Down)
+TriggerTiming=lift          # lift = run actions when fingers lift; midswipe = while swiping
+TriggerDistance=80          # midswipe only: travel before the action runs
 ```
 
 | Value | Meaning |
