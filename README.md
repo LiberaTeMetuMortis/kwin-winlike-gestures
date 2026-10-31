@@ -609,12 +609,17 @@ contains only `packaging/_service`. Everything else comes from git:
 
 | `_service` step | What it does |
 |---|---|
-| `obs_scm` | Checks out `main` from GitHub, sets the version from the newest `v*` tag, extracts the spec and `.changes` |
+| `obs_scm` | Checks out `main` from GitHub, sets the version from the newest `v*` tag, extracts every `packaging/kwin-winlike-gestures*` file (spec, `.changes`, `rpmlintrc`) |
 | `tar`, `recompress` | Turn the checkout into `kwin-winlike-gestures-<version>.tar.gz` (at build time) |
 | `set_version` | Writes the version into the spec's `Version:` (at build time) |
 
 It's built for Tumbleweed and Slowroll on x86_64 only (the package's build settings
-disable the project's other repositories, which don't have Plasma 6).
+disable the project's other repositories, which don't have Plasma 6). The package's
+settings also enable **debuginfo**, so OBS publishes `kwin-winlike-gestures-debuginfo`
+and `-debugsource` next to the main package: install them to get a readable backtrace
+(`coredumpctl gdb kwin_wayland`) if the plugin ever crashes KWin.
+`packaging/kwin-winlike-gestures-rpmlintrc` silences one false rpmlint warning
+(`desktopfile-without-binary`: System Settings isn't installed in the build root).
 
 **One-time setup for the GitHub → OBS trigger:**
 

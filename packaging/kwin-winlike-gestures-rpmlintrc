@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2026 LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# rpmlint filters for OBS builds.
+#
+# The settings page's .desktop file starts it with Exec=systemsettings. rpmlint
+# looks for that program in the build root, where System Settings isn't
+# installed (it isn't needed to build); every Plasma desktop has it.
+addFilter("desktopfile-without-binary .*kcm_winlikegestures\.desktop systemsettings")
