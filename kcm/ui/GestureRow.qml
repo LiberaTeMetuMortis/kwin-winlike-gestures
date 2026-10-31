@@ -19,6 +19,16 @@ RowLayout {
     property string helpText
     readonly property string spec: (kcm.revision, kcm.value(key))
 
+    // Plasma's own gestures, which follow the fingers. Swipes only: KWin has
+    // no animated pinch gestures to hand a pinch to.
+    readonly property var plasmaPresets: key.startsWith("Swipe") ? [
+        { text: i18nc("@item:inlistbox", "Slide to the desktop on the right"), spec: "plasma:4Left" },
+        { text: i18nc("@item:inlistbox", "Slide to the desktop on the left"), spec: "plasma:4Right" },
+        { text: i18nc("@item:inlistbox", "Slide to the desktop below"), spec: "plasma:3Up" },
+        { text: i18nc("@item:inlistbox", "Slide to the desktop above"), spec: "plasma:3Down" },
+        { text: i18nc("@item:inlistbox", "Overview (follows fingers)"), spec: "plasma:4Up" },
+        { text: i18nc("@item:inlistbox", "Desktop grid (follows fingers)"), spec: "plasma:4Down" },
+    ] : []
     readonly property var presets: [
         { text: i18nc("@item:inlistbox", "Overview"), spec: "shortcut:kwin/Overview" },
         { text: i18nc("@item:inlistbox", "Show desktop"), spec: "shortcut:kwin/Show Desktop" },
@@ -26,6 +36,7 @@ RowLayout {
         { text: i18nc("@item:inlistbox", "Next virtual desktop"), spec: "shortcut:kwin/Switch to Next Desktop" },
         { text: i18nc("@item:inlistbox", "Previous virtual desktop"), spec: "shortcut:kwin/Switch to Previous Desktop" },
         { text: i18nc("@item:inlistbox", "Desktop grid"), spec: "shortcut:kwin/Grid View" },
+        ...plasmaPresets,
         { text: i18nc("@item:inlistbox", "Other KWin shortcut…"), spec: "", custom: "shortcut" },
         { text: i18nc("@item:inlistbox", "Run command…"), spec: "", custom: "command" },
         { text: i18nc("@item:inlistbox", "Do nothing"), spec: "block" },

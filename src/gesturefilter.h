@@ -21,6 +21,10 @@ namespace WinLike
  * never reaches KWin. A gesture we handle in only some directions is passed
  * through until its direction is known; if that direction is ours, the rest
  * of the input chain gets a cancel event and we take over from there.
+ *
+ * A direction bound to one of KWin's own gestures ("plasma:4Left") is held
+ * back until the direction is known, then replayed down the chain as that
+ * gesture, so KWin animates it following the fingers.
  */
 class GestureFilter : public KWin::InputEventFilter
 {
@@ -43,6 +47,7 @@ private:
         Ignored, // not ours, pass everything through
         Watching, // passing through until the direction is known
         Owned, // ours, swallow everything
+        Handed, // swallowed, and replayed down the chain as one of KWin's gestures
     };
 
     Mode modeFor(GestureType type, int fingers) const;
@@ -53,6 +58,12 @@ private:
     void openSwitcher(std::chrono::microseconds time);
     void stepSwitcher(const QPoint &steps, std::chrono::microseconds time);
     void closeSwitcher(bool accept, std::chrono::microseconds time);
+
+    // Gives the swipe to KWin's gesture `action` names, movement so far included.
+    void handToKWin(const Action &action, std::chrono::microseconds time);
+    // Sends an event down the whole input chain; our own filter lets it pass.
+    template<typename Event>
+    void forward(bool (KWin::InputEventFilter::*method)(Event *), Event event);
 
     const GestureConfig *m_config;
     SwipeRecognizer m_swipe;
@@ -69,6 +80,11 @@ private:
     Mode m_pinchMode = Mode::Ignored;
     // Set while we push our own cancel event down the chain.
     bool m_sendingCancel = false;
+    // Set while we replay a handed-over swipe down the chain.
+    bool m_forwarding = false;
+    // A handed-over swipe is turned from the real direction to KWin's one.
+    Direction m_turnFrom = Direction::None;
+    Direction m_turnTo = Direction::None;
 };
 
 } // namespace WinLike

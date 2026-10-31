@@ -17,6 +17,10 @@ enum class Direction { None, Up, Down, Left, Right, In, Out };
 
 QString directionName(Direction d);
 Direction opposite(Direction d);
+// Turns a swipe delta so that movement towards `from` becomes movement towards
+// `to`; sideways movement turns with it. Used to hand a swipe to KWin as a
+// swipe in another direction.
+QPointF turnDelta(const QPointF &delta, Direction from, Direction to);
 
 /**
  * Accumulates the deltas of one touchpad swipe and locks onto a direction
@@ -38,6 +42,8 @@ public:
     Direction direction() const { return m_direction; }
     // Movement along the locked axis, positive in the locked direction.
     qreal progress() const;
+    // All movement since begin().
+    QPointF total() const { return m_total; }
 
 private:
     qreal m_threshold;

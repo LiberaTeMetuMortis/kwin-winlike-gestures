@@ -55,12 +55,37 @@ GestureFilter::GestureFilter(const GestureConfig *config)
 {
 }
 
-// Never leave a fake Alt held down if we get unloaded mid-gesture.
+// Never leave a fake Alt held down, or a KWin gesture running, if we get
+// unloaded mid-gesture.
 GestureFilter::~GestureFilter()
 {
     if (m_switcherOpen) {
         closeSwitcher(false, now());
     }
+    if (m_swipeMode == Mode::Handed) {
+        forward(&KWin::InputEventFilter::swipeGestureCancelled, KWin::PointerSwipeGestureCancelEvent{now()});
+    }
+}
+
+template<typename Event>
+void GestureFilter::forward(bool (KWin::InputEventFilter::*method)(Event *), Event event)
+{
+    m_forwarding = true;
+    KWin::input()->processFilters(method, &event);
+    m_forwarding = false;
+}
+
+// KWin hasn't seen this swipe yet: start its gesture now and give it all the
+// movement so far, so it animates from where the fingers already are.
+void GestureFilter::handToKWin(const Action &action, std::chrono::microseconds time)
+{
+    qCDebug(WINLIKE) << "swipe handed to KWin as" << action.toString();
+    m_swipeMode = Mode::Handed;
+    m_turnFrom = m_swipe.direction();
+    m_turnTo = action.targetDirection;
+    forward(&KWin::InputEventFilter::swipeGestureBegin, KWin::PointerSwipeGestureBeginEvent{action.targetFingers, time});
+    forward(&KWin::InputEventFilter::swipeGestureUpdate,
+            KWin::PointerSwipeGestureUpdateEvent{turnDelta(m_swipe.total(), m_turnFrom, m_turnTo), time});
 }
 
 void GestureFilter::openSwitcher(std::chrono::microseconds time)
@@ -118,6 +143,9 @@ void GestureFilter::finish(GestureType type, Mode mode, int fingers, Direction d
 
 bool GestureFilter::swipeGestureBegin(KWin::PointerSwipeGestureBeginEvent *event)
 {
+    if (m_forwarding) {
+        return false;
+    }
     m_swipe.setThreshold(m_config->swipeThreshold());
     m_swipe.begin(event->fingerCount);
     m_states = currentStates();
@@ -131,6 +159,14 @@ bool GestureFilter::swipeGestureBegin(KWin::PointerSwipeGestureBeginEvent *event
 
 bool GestureFilter::swipeGestureUpdate(KWin::PointerSwipeGestureUpdateEvent *event)
 {
+    if (m_forwarding) {
+        return false;
+    }
+    if (m_swipeMode == Mode::Handed) {
+        forward(&KWin::InputEventFilter::swipeGestureUpdate,
+                KWin::PointerSwipeGestureUpdateEvent{turnDelta(event->delta, m_turnFrom, m_turnTo), event->time});
+        return true;
+    }
     const Direction locked = m_swipe.update(event->delta);
     if (m_swipeMode == Mode::Watching && locked != Direction::None) {
         if (m_config->action(GestureType::Swipe, m_swipe.fingers(), locked, m_states).handled()) {
@@ -148,7 +184,12 @@ bool GestureFilter::swipeGestureUpdate(KWin::PointerSwipeGestureUpdateEvent *eve
     }
 
     if (locked != Direction::None) {
-        if (m_config->action(GestureType::Swipe, m_swipe.fingers(), locked, m_states).kind == Action::Kind::Switcher) {
+        const Action action = m_config->action(GestureType::Swipe, m_swipe.fingers(), locked, m_states);
+        if (action.kind == Action::Kind::Plasma) {
+            handToKWin(action, event->time);
+            return true;
+        }
+        if (action.kind == Action::Kind::Switcher) {
             openSwitcher(event->time);
         }
     } else if (m_switcherOpen) {
@@ -188,30 +229,38 @@ bool GestureFilter::swipeGestureUpdate(KWin::PointerSwipeGestureUpdateEvent *eve
 
 bool GestureFilter::swipeGestureEnd(KWin::PointerSwipeGestureEndEvent *event)
 {
+    if (m_forwarding) {
+        return false;
+    }
     const Mode mode = m_swipeMode;
-    if (m_switcherOpen) {
+    if (mode == Mode::Handed) {
+        forward(&KWin::InputEventFilter::swipeGestureEnd, *event);
+    } else if (m_switcherOpen) {
         closeSwitcher(true, event->time);
     } else if (m_swipeTrigger.end()) {
         finish(GestureType::Swipe, mode, m_swipe.fingers(), m_swipe.direction());
     }
     m_swipe.reset();
     m_swipeMode = Mode::Ignored;
-    return mode == Mode::Owned;
+    return mode == Mode::Owned || mode == Mode::Handed;
 }
 
 bool GestureFilter::swipeGestureCancelled(KWin::PointerSwipeGestureCancelEvent *event)
 {
-    if (m_sendingCancel) {
+    if (m_sendingCancel || m_forwarding) {
         return false;
     }
     qCDebug(WINLIKE) << "swipe cancelled, fingers:" << m_swipe.fingers();
+    const Mode mode = m_swipeMode;
+    if (mode == Mode::Handed) {
+        forward(&KWin::InputEventFilter::swipeGestureCancelled, *event);
+    }
     if (m_switcherOpen) {
         closeSwitcher(false, event->time);
     }
-    const Mode mode = m_swipeMode;
     m_swipe.reset();
     m_swipeMode = Mode::Ignored;
-    return mode == Mode::Owned;
+    return mode == Mode::Owned || mode == Mode::Handed;
 }
 
 bool GestureFilter::pinchGestureBegin(KWin::PointerPinchGestureBeginEvent *event)

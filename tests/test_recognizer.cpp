@@ -14,6 +14,35 @@ class TestRecognizer : public QObject
     Q_OBJECT
 
 private Q_SLOTS:
+    // Handing a swipe to KWin as a swipe in another direction: movement towards
+    // the swipe's direction becomes movement towards the target, so moving back
+    // still moves back, and sideways drift turns along with it.
+    void turnDelta_data()
+    {
+        QTest::addColumn<QPointF>("delta");
+        QTest::addColumn<Direction>("from");
+        QTest::addColumn<Direction>("to");
+        QTest::addColumn<QPointF>("expected");
+        QTest::newRow("same direction") << QPointF(3, -4) << Direction::Left << Direction::Left << QPointF(3, -4);
+        QTest::newRow("up as left") << QPointF(0, -10) << Direction::Up << Direction::Left << QPointF(-10, 0);
+        QTest::newRow("back down as right") << QPointF(0, 10) << Direction::Up << Direction::Left << QPointF(10, 0);
+        QTest::newRow("left as up") << QPointF(-10, 0) << Direction::Left << Direction::Up << QPointF(0, -10);
+        QTest::newRow("up as down") << QPointF(0, -10) << Direction::Up << Direction::Down << QPointF(0, 10);
+        QTest::newRow("right as left") << QPointF(10, 2) << Direction::Right << Direction::Left << QPointF(-10, -2);
+        QTest::newRow("sideways drift turns too") << QPointF(4, -10) << Direction::Up << Direction::Left << QPointF(-10, -4);
+    }
+
+    void turnDelta()
+    {
+        QFETCH(QPointF, delta);
+        QFETCH(Direction, from);
+        QFETCH(Direction, to);
+        QFETCH(QPointF, expected);
+        const QPointF turned = WinLike::turnDelta(delta, from, to);
+        QVERIFY2(qFuzzyCompare(turned.x() + 1, expected.x() + 1) && qFuzzyCompare(turned.y() + 1, expected.y() + 1),
+                 qPrintable(QStringLiteral("got %1, %2").arg(turned.x()).arg(turned.y())));
+    }
+
     void staysUnlockedBelowThreshold()
     {
         SwipeRecognizer r(30);

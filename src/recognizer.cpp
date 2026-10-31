@@ -31,6 +31,44 @@ QString directionName(Direction d)
     return QStringLiteral("None");
 }
 
+namespace
+{
+// Unit vector of a swipe direction, in libinput coordinates (+x right, +y down).
+QPointF unit(Direction d)
+{
+    switch (d) {
+    case Direction::Up:
+        return {0, -1};
+    case Direction::Down:
+        return {0, 1};
+    case Direction::Left:
+        return {-1, 0};
+    case Direction::Right:
+        return {1, 0};
+    default:
+        return {};
+    }
+}
+
+QPointF perpendicular(const QPointF &v)
+{
+    return {-v.y(), v.x()};
+}
+} // namespace
+
+QPointF turnDelta(const QPointF &delta, Direction from, Direction to)
+{
+    const QPointF f = unit(from);
+    const QPointF t = unit(to);
+    if (f.isNull() || t.isNull()) {
+        return delta;
+    }
+    // A rotation, so the turned swipe keeps its length and its sideways drift.
+    const qreal along = QPointF::dotProduct(delta, f);
+    const qreal sideways = QPointF::dotProduct(delta, perpendicular(f));
+    return along * t + sideways * perpendicular(t);
+}
+
 Direction opposite(Direction d)
 {
     switch (d) {

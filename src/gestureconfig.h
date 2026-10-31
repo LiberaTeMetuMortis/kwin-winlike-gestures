@@ -31,11 +31,15 @@ struct Action {
         Shortcut, // invoke a kglobalaccel shortcut: component + name
         Command, // run a shell command
         Switcher, // hold the Alt+Tab switcher open, step with finger movement
+        Plasma, // hand the swipe to one of KWin's own gestures, which follow the fingers
     };
 
     Kind kind = Kind::Passthrough;
     QString component;
     QString name; // shortcut name, or the command line
+    // Plasma: the KWin touchpad gesture the swipe is handed to.
+    int targetFingers = 0;
+    Direction targetDirection = Direction::None;
 
     static Action parse(const QString &spec);
     QString toString() const;

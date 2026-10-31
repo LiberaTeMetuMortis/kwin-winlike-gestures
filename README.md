@@ -27,7 +27,7 @@ Built and tested against **KWin / Plasma 6.8.1** on openSUSE Tumbleweed.
 | 3-finger swipe left / right | **Alt+Tab switcher.** Opens and stays open while your fingers are down; keep sliding left/right/up/down to move the selection (like the arrow keys); lift to switch. A quick flick jumps to the previous window. |
 | 4-finger swipe up | Same as 3-finger up (including the desktop-shown rule) |
 | 4-finger swipe down | Same as 3-finger down (including the Overview rule) |
-| 4-finger swipe left / right | Previous / next virtual desktop (left goes to the desktop on the left) |
+| 4-finger swipe left / right | **Slide between virtual desktops**, using Plasma's own animation, which follows your fingers. The desktop moves with them, so swiping left brings in the desktop on the right. Swipe back before lifting to stay where you are. |
 | 2-finger scroll, pinch-zoom, 2-finger tap | Untouched: handled by libinput and apps, already like Windows |
 
 Every binding can be changed in **System Settings → Mouse & Touchpad → Touchpad
@@ -198,6 +198,44 @@ Cancelling KWin's gesture partway through isn't fully reliable (KWin's animation
 already have started), so binding all four directions of a finger count gives the
 cleanest result.
 
+### Handing a swipe to Plasma's own gestures
+
+KWin's built-in touchpad gestures follow the fingers: the desktop slide moves with them,
+Overview grows in, and lifting halfway finishes or snaps back. A direction bound to
+`plasma:<fingers><direction>` (e.g. `plasma:4Left`) borrows one of those:
+
+1. The plugin owns the gesture as usual, so KWin sees nothing while the direction is
+   unknown. (This is why it works where `passthrough` for some directions doesn't.)
+2. When the direction locks, the plugin replays the swipe down the input chain
+   (`input()->processFilters`, the same call used for cancel events): a begin event
+   with the target's finger count, then one update holding all the movement so far.
+   Our own filter lets these through, and KWin's GlobalShortcut filter starts its
+   gesture as if the fingers had been there from the start.
+3. Every later update, the end and any cancel are passed on the same way.
+
+The swipe can be handed over as a different gesture. `turnDelta()` rotates the
+movement so that travel in the real direction becomes travel in the target's: with
+`Swipe4Up=plasma:4Left`, moving up counts as moving left, and moving back down as moving
+right, so stopping or reversing still snaps back. The finger count can change too:
+KWin's vertical desktop slide only exists for 3 fingers, so `plasma:3Up` serves a
+4-finger swipe as well.
+
+KWin 6.8 has these touchpad gestures (content follows the fingers):
+
+| Target | KWin gesture |
+|---|---|
+| `plasma:4Left` / `plasma:3Left` | Slide to the desktop on the right |
+| `plasma:4Right` / `plasma:3Right` | Slide to the desktop on the left |
+| `plasma:3Up` | Slide to the desktop below |
+| `plasma:3Down` | Slide to the desktop above |
+| `plasma:4Up` | Overview; again from Overview for the desktop grid |
+| `plasma:4Down` | Desktop grid; from Overview or the grid, closes it |
+
+A slide only does something if there's a desktop on that side: with desktops in one
+row, *below* and *above* do nothing; with one desktop per row, *left* and *right* do
+nothing. KWin moves one step at a time, so with three desktops in two rows (`[1][2]` over
+`[3]`) bind left/right to the sideways slides and up/down to the vertical ones.
+
 ### Direction recognition
 
 `SwipeRecognizer` adds up libinput deltas (+x right, +y down). Once the total movement
@@ -231,6 +269,8 @@ in either mode.
   from the plugin would make KWin wait on itself forever. The plugin only uses
   fire-and-forget `QDBusConnection::send()`.
 * **`command:`** runs `/bin/sh -c <command>` detached with `QProcess::startDetached`.
+* **`plasma:`** is driven live by `GestureFilter`, see
+  [Handing a swipe to Plasma's own gestures](#handing-a-swipe-to-plasmas-own-gestures).
 
 ### The live Alt+Tab switcher
 
@@ -303,12 +343,13 @@ kde-gestures/
 │   ├── winlikeplugin.h/.cpp  WinLikeGestures (KWin::Plugin): owns config + filter, installs
 │   │                         the filter, reloads config via KConfigWatcher / KWin reconfigure
 │   ├── gesturefilter.h/.cpp  GestureFilter (KWin::InputEventFilter): Owned/Watching/Ignored
-│   │                         logic, desktop-state snapshot, cancel injection, live switcher
+│   │                         logic, desktop-state snapshot, cancel injection, live switcher,
+│   │                         handing swipes to KWin's own gestures
 │   ├── actionrunner.h/.cpp   runAction(): non-blocking kglobalaccel calls and commands
 │   ├── gestureconfig.h/.cpp  Action parsing, built-in defaults, overrides, state-specific
 │   │                         bindings, coverage queries
 │   ├── recognizer.h/.cpp     SwipeRecognizer, PinchRecognizer, SwitcherStepper,
-│   │                         SwitcherNavigator, ActionTrigger
+│   │                         SwitcherNavigator, ActionTrigger, turnDelta
 │   └── logging.h             WINLIKE logging category (kwin_winlike_gestures)
 ├── kcm/                      System Settings page (separate .so, runs in systemsettings)
 │   ├── CMakeLists.txt        kcmutils_add_qml_kcm; optional via -DBUILD_KCM=OFF
@@ -319,7 +360,8 @@ kde-gestures/
 │       ├── main.qml          the form: sections per finger count, states, pinch, sliders
 │       └── GestureRow.qml    one binding: action dropdown + shortcut picker / command field
 └── tests/
-    ├── test_recognizer.cpp   direction lock, threshold, progress, reset, pinch, stepping
+    ├── test_recognizer.cpp   direction lock, threshold, progress, reset, pinch, stepping,
+    │                         turning a swipe into another direction
     └── test_gestureconfig.cpp parsing, round-trip, defaults, overrides, states, bad values
 ```
 
@@ -491,9 +533,10 @@ kcm_winlikegestures`). It has:
   *and* loads or unloads the plugin in the running KWin, so it takes effect at once.
 * A dropdown per gesture: 3- and 4-finger swipes, the *While Overview is open* and
   *While the desktop is shown* states, and 2/3-finger pinch. Choices: Overview, Show
-  desktop, Window switcher, Next/Previous virtual desktop, Desktop grid, *Other KWin
-  shortcut…* (picker listing every KWin shortcut), *Run command…*, Do nothing, Leave to
-  Plasma or the app. State rows you haven't changed show the normal gesture's action
+  desktop, Window switcher, Next/Previous virtual desktop, Desktop grid, for swipes the
+  animated *Slide to the desktop on the right/left/below/above*, *Overview (follows
+  fingers)* and *Desktop grid (follows fingers)*, *Other KWin shortcut…* (picker listing
+  every KWin shortcut), *Run command…*, Do nothing, Leave to Plasma or the app. State rows you haven't changed show the normal gesture's action
   (with Overview open, "Overview" shows as *Close Overview*, since it toggles).
 * **Run actions:** *When fingers lift* (default) or *Mid-swipe, after a set distance*,
   with a slider for that distance, and **Swipe back to undo** (mid-swipe only).
@@ -525,8 +568,8 @@ kwriteconfig6 --notify --file kwinwinlikegesturesrc --group Gestures --key Swipe
 [Gestures]
 # Keys:   Swipe<fingers><Up|Down|Left|Right>, Pinch<fingers><In|Out>
 Swipe3Up=shortcut:kwin/Overview
-Swipe4Left=shortcut:kwin/Switch to Previous Desktop
-Swipe4Right=shortcut:kwin/Switch to Next Desktop
+Swipe4Left=plasma:4Left     # slide to the desktop on the right, following the fingers
+Swipe4Up=plasma:3Up         # slide to the desktop below (desktops in rows)
 Pinch3In=command:dolphin
 
 # State-specific: wins over the plain key while that state holds
@@ -549,6 +592,7 @@ ReverseUndo=false           # midswipe only: swipe back the other way to undo
 | `shortcut:<component>/<name>` | Trigger a KDE global shortcut |
 | `command:<shell command>` | Run a command |
 | `switcher` | Live Alt+Tab switcher (meant for horizontal swipes) |
+| `plasma:<3\|4><Up\|Down\|Left\|Right>` | Swipes only: hand the swipe to that KWin gesture, which follows the fingers (see [Handing a swipe to Plasma's own gestures](#handing-a-swipe-to-plasmas-own-gestures)) |
 | `block` | Swallow the gesture and do nothing |
 | `passthrough` | Leave the gesture to KWin / the focused app |
 | `inherit` | Ignore this key. On a state key (`Swipe3Down.Overview`), it removes the built-in state rule so the normal binding applies |
@@ -591,7 +635,11 @@ journalctl --user -f | grep -E 'swipe|pinch|switcher|running|config loaded'
   (hand edits don't notify the plugin) and look for `config loaded` in the log (debug logging on).
 * **A gesture is recognized but nothing happens:** check that the shortcut exists in
   `shortcutNames`. For example, "Switch One Desktop to the Left" does nothing if your
-  desktops are stacked in rows. That's why the defaults use Next/Previous Desktop.
+  desktops are stacked in rows.
+* **A desktop slide does nothing:** there's no desktop on that side. The slides follow
+  the layout in System Settings → Virtual Desktops: in one row only left/right move,
+  with one desktop per row only up/down (*below*/*above*). The log shows
+  `swipe handed to KWin as plasma:…` when the plugin passed the swipe on.
 * **A 4-finger swipe opens the switcher:** the touchpad reported 3 fingers at the start
   (one finger landed late). The log shows `swipe begin, fingers: N` for every swipe.
 * **Alt seems stuck:** tap the physical Alt key once.
@@ -711,6 +759,10 @@ a Fedora COPR would follow the same pattern as the spec.
   not as a gesture.
 * **Watching mode** (only some directions of a finger count bound) can't always stop
   KWin's built-in animation once it has started.
+* `plasma:` relies on KWin's built-in gestures and how its input chain treats replayed
+  events, both internal. A Plasma update can change or move them; check the
+  `plasma:` targets after each one. Pinches can't be handed over: KWin 6.8 has no
+  animated touchpad pinch gestures.
 * The live switcher fakes Alt/Tab/arrow keys. If you've remapped Walk Through Windows
   away from Alt+Tab, set the gesture to a `shortcut:` instead.
 * The settings page is English-only (strings are marked for translation, but no

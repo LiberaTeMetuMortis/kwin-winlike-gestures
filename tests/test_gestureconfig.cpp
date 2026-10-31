@@ -29,6 +29,26 @@ private Q_SLOTS:
         QCOMPARE(Action::parse(QStringLiteral("bogus")).kind, Action::Kind::Passthrough);
     }
 
+    void parsePlasmaAction()
+    {
+        const Action a = Action::parse(QStringLiteral(" plasma:3Up "));
+        QCOMPARE(a.kind, Action::Kind::Plasma);
+        QCOMPARE(a.targetFingers, 3);
+        QCOMPARE(a.targetDirection, Direction::Up);
+        QCOMPARE(a.toString(), QStringLiteral("plasma:3Up"));
+        QVERIFY(a.handled());
+        // Plasma's own gesture already snaps back, nothing for us to undo.
+        QVERIFY(!a.canUndo());
+    }
+
+    void parsePlasmaActionRejectsGesturesKWinDoesNotHave()
+    {
+        // KWin only has 3- and 4-finger touchpad swipes.
+        for (const char *spec : {"plasma", "plasma:", "plasma:Left", "plasma:2Left", "plasma:5Left", "plasma:4In", "plasma:4Sideways", "plasma:44Left"}) {
+            QCOMPARE(Action::parse(QString::fromLatin1(spec)).kind, Action::Kind::Passthrough);
+        }
+    }
+
     void roundTrip()
     {
         for (const QString &spec : GestureConfig::defaults()) {
@@ -50,9 +70,10 @@ private Q_SLOTS:
         QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left).kind, Action::Kind::Switcher);
         QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Right).kind, Action::Kind::Switcher);
         QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Up).name, QStringLiteral("Overview"));
-        // Swiping left goes to the desktop on the left, like moving along the row.
-        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Left).name, QStringLiteral("Switch to Previous Desktop"));
-        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Right).name, QStringLiteral("Switch to Next Desktop"));
+        // Plasma's own desktop slide, following the fingers: the desktop moves
+        // with them, so swiping left brings in the desktop on the right.
+        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Left), Action::parse(QStringLiteral("plasma:4Left")));
+        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Right), Action::parse(QStringLiteral("plasma:4Right")));
         QVERIFY(!c.action(GestureType::Pinch, 2, Direction::In).handled());
         QVERIFY(!c.action(GestureType::Swipe, 5, Direction::Up).handled());
         QCOMPARE(c.switcherStep(), 100.0);

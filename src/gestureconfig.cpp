@@ -15,6 +15,7 @@ namespace
 
 const QString s_shortcutPrefix = QStringLiteral("shortcut:");
 const QString s_commandPrefix = QStringLiteral("command:");
+const QString s_plasmaPrefix = QStringLiteral("plasma:");
 
 std::initializer_list<Direction> directionsOf(GestureType type)
 {
@@ -49,6 +50,23 @@ Action Action::parse(const QString &spec)
         }
         return {};
     }
+    if (s.startsWith(s_plasmaPrefix)) {
+        // "plasma:4Left": hand the swipe to KWin as a 4-finger left swipe.
+        // KWin only has 3- and 4-finger touchpad swipes.
+        const QString target = s.mid(s_plasmaPrefix.size());
+        const int fingers = target.left(1).toInt();
+        if (fingers == 3 || fingers == 4) {
+            for (Direction d : directionsOf(GestureType::Swipe)) {
+                if (target.mid(1) == directionName(d)) {
+                    Action action{Kind::Plasma, {}, {}};
+                    action.targetFingers = fingers;
+                    action.targetDirection = d;
+                    return action;
+                }
+            }
+        }
+        return {};
+    }
     if (s.startsWith(s_commandPrefix)) {
         const QString command = s.mid(s_commandPrefix.size()).trimmed();
         if (!command.isEmpty()) {
@@ -69,6 +87,8 @@ QString Action::toString() const
         return s_commandPrefix + name;
     case Kind::Switcher:
         return QStringLiteral("switcher");
+    case Kind::Plasma:
+        return s_plasmaPrefix + QString::number(targetFingers) + directionName(targetDirection);
     case Kind::Passthrough:
         break;
     }
@@ -95,10 +115,10 @@ QMap<QString, QString> GestureConfig::defaults()
         {QStringLiteral("Swipe3Right"), QStringLiteral("switcher")},
         {QStringLiteral("Swipe4Up"), QStringLiteral("shortcut:kwin/Overview")},
         {QStringLiteral("Swipe4Down"), QStringLiteral("shortcut:kwin/Show Desktop")},
-        // Swiping left goes to the desktop on the left (previous), right to the next one.
-        // Next/Previous rather than Left/Right so it works with any desktop grid.
-        {QStringLiteral("Swipe4Left"), QStringLiteral("shortcut:kwin/Switch to Previous Desktop")},
-        {QStringLiteral("Swipe4Right"), QStringLiteral("shortcut:kwin/Switch to Next Desktop")},
+        // Plasma's own desktop slide, which follows the fingers: the desktop
+        // moves with them, so swiping left brings in the desktop on the right.
+        {QStringLiteral("Swipe4Left"), QStringLiteral("plasma:4Left")},
+        {QStringLiteral("Swipe4Right"), QStringLiteral("plasma:4Right")},
         // Up and down undo each other, like on Windows. Both shortcuts toggle.
         {QStringLiteral("Swipe3Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},
         {QStringLiteral("Swipe4Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},

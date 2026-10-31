@@ -85,7 +85,7 @@ KCM.SimpleKCM {
         GestureRow {
             key: "Swipe4Left"
             Kirigami.FormData.label: i18nc("@label", "Left:")
-            helpText: i18nc("@info:tooltip", "Swiping left goes to the desktop on the left (previous), swiping right to the next one. Next and previous work with any desktop layout, including desktops arranged in rows.")
+            helpText: i18nc("@info:tooltip", "The \"Slide to the desktop…\" choices use Plasma's own animation, which follows your fingers: the desktop moves with them, so swiping left brings in the desktop on the right. Stop and swipe back before lifting to stay where you are. A slide only works if there is a desktop on that side; with desktops in rows, use \"below\" and \"above\" for up and down.")
         }
         GestureRow { key: "Swipe4Right"; Kirigami.FormData.label: i18nc("@label", "Right:") }
 
