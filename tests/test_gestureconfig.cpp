@@ -185,6 +185,19 @@ private Q_SLOTS:
         QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left, both).name, QStringLiteral("a"));
     }
 
+    void overviewIgnoresDesktopRules()
+    {
+        // Overview is drawn on top of a shown desktop, so while it is open a
+        // missing .Overview rule falls back to the normal key, never to .Desktop.
+        GestureConfig c;
+        const States both = State::OverviewOpen | State::DesktopShown;
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Up, both).name, QStringLiteral("Overview"));
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Down, both).name, QStringLiteral("Overview"));
+        c.load({{QStringLiteral("Swipe3Left.Desktop"), QStringLiteral("command:b")}});
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left, both).kind, Action::Kind::Switcher);
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left, State::DesktopShown).name, QStringLiteral("b"));
+    }
+
     void badThresholdIgnored()
     {
         GestureConfig c;

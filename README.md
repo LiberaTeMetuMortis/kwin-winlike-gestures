@@ -275,9 +275,11 @@ When a gesture starts, the plugin takes a snapshot of two desktop states:
 * **Desktop shown:** `workspace()->showingDesktop()`
 
 A binding with a state suffix (`Swipe3Down.Overview`, `Swipe3Up.Desktop`) wins over the
-plain one while that state holds. If both states hold, `.Overview` is checked first
-(Overview is drawn on top). That snapshot is used for the whole gesture, so the state
-changing halfway through (e.g. Overview opening) doesn't switch actions mid-swipe.
+plain one while that state holds. If both states hold, only `.Overview` rules apply
+(Overview is drawn on top): without one, the plain key is used, never the `.Desktop`
+rule. That snapshot is used for the gesture's first action, so the state changing
+halfway through (e.g. Overview opening) doesn't switch actions mid-swipe; only a swipe
+back to undo looks at the state again.
 
 ---
 

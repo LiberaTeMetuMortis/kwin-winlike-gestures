@@ -135,17 +135,17 @@ void GestureConfig::load(const QMap<QString, QString> &overrides)
 Action GestureConfig::action(GestureType type, int fingers, Direction direction, States states) const
 {
     const QString base = key(type, fingers, direction);
-    // Overview is checked first: it is drawn on top of a shown desktop.
-    static const std::pair<State, QString> suffixes[] = {
-        {State::OverviewOpen, QStringLiteral(".Overview")},
-        {State::DesktopShown, QStringLiteral(".Desktop")},
-    };
-    for (const auto &[state, suffix] : suffixes) {
-        if (states.testFlag(state)) {
-            const auto it = m_bindings.constFind(base + suffix);
-            if (it != m_bindings.cend()) {
-                return *it;
-            }
+    // Overview is drawn on top of a shown desktop, so while it is open only
+    // .Overview rules apply: without one, the normal key, never .Desktop.
+    QString suffix;
+    if (states.testFlag(State::OverviewOpen)) {
+        suffix = QStringLiteral(".Overview");
+    } else if (states.testFlag(State::DesktopShown)) {
+        suffix = QStringLiteral(".Desktop");
+    }
+    if (!suffix.isEmpty()) {
+        if (const auto it = m_bindings.constFind(base + suffix); it != m_bindings.cend()) {
+            return *it;
         }
     }
     return m_bindings.value(base);
