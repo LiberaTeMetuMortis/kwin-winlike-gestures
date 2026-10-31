@@ -58,6 +58,12 @@ public:
 
     static QString key(GestureType type, int fingers, Direction direction);
     static QMap<QString, QString> defaults();
+    // Fallbacks for the tuning keys, as config-file strings.
+    static QMap<QString, QString> tuningDefaults();
+    // The entries of a config file that differ from the built-in defaults
+    // (bindings and tuning). A state key equal to its normal gesture is kept:
+    // it was set on purpose and must not start following the normal gesture.
+    static QMap<QString, QString> overrides(const QMap<QString, QString> &entries);
 
     // Applies overrides. Keys: "Threshold", "PinchThreshold", "SwitcherStep",
     // "SwitcherStepVertical", "TriggerTiming" (lift | midswipe),

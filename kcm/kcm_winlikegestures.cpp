@@ -23,17 +23,6 @@ const QString s_group = QStringLiteral("Gestures");
 const QString s_pluginId = QStringLiteral("winlikegestures");
 const QString s_enabledKey = s_pluginId + QStringLiteral("Enabled");
 
-// Mirrors the fallbacks in GestureConfig::load().
-const QMap<QString, QString> s_tuningDefaults = {
-    {QStringLiteral("Threshold"), QStringLiteral("30")},
-    {QStringLiteral("PinchThreshold"), QStringLiteral("0.2")},
-    {QStringLiteral("SwitcherStep"), QStringLiteral("100")},
-    {QStringLiteral("SwitcherStepVertical"), QStringLiteral("60")},
-    {QStringLiteral("TriggerTiming"), QStringLiteral("lift")},
-    {QStringLiteral("TriggerDistance"), QStringLiteral("80")},
-    {QStringLiteral("ReverseUndo"), QStringLiteral("false")},
-};
-
 KConfigGroup kwinPlugins()
 {
     return KSharedConfig::openConfig(QStringLiteral("kwinrc"))->group(QStringLiteral("Plugins"));
@@ -56,7 +45,7 @@ KCMWinLikeGestures::KCMWinLikeGestures(QObject *parent, const KPluginMetaData &m
     , m_config(KSharedConfig::openConfig(s_configName, KConfig::SimpleConfig))
     , m_defaults(WinLike::GestureConfig::defaults())
 {
-    m_defaults.insert(s_tuningDefaults);
+    m_defaults.insert(WinLike::GestureConfig::tuningDefaults());
     setButtons(Apply | Default);
 }
 
@@ -133,12 +122,9 @@ void KCMWinLikeGestures::load()
 {
     m_config->reparseConfiguration();
     m_overrides.clear();
-    const QMap<QString, QString> entries = m_config->group(s_group).entryMap();
-    for (auto it = entries.cbegin(); it != entries.cend(); ++it) {
-        if (it.value() != defaultValue(it.key())) {
-            m_overrides.insert(it.key(), it.value());
-        }
-    }
+    // Compared with the built-in defaults, not with what a row displays: a
+    // state key equal to its normal gesture was written on purpose.
+    m_overrides = WinLike::GestureConfig::overrides(m_config->group(s_group).entryMap());
     m_savedOverrides = m_overrides;
 
     kwinPlugins().config()->reparseConfiguration();

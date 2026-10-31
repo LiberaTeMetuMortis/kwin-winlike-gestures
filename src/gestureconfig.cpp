@@ -107,6 +107,33 @@ QMap<QString, QString> GestureConfig::defaults()
     };
 }
 
+QMap<QString, QString> GestureConfig::tuningDefaults()
+{
+    // Must match the fallbacks in load() (tested).
+    return {
+        {QStringLiteral("Threshold"), QStringLiteral("30")},
+        {QStringLiteral("PinchThreshold"), QStringLiteral("0.2")},
+        {QStringLiteral("SwitcherStep"), QStringLiteral("100")},
+        {QStringLiteral("SwitcherStepVertical"), QStringLiteral("60")},
+        {QStringLiteral("TriggerTiming"), QStringLiteral("lift")},
+        {QStringLiteral("TriggerDistance"), QStringLiteral("80")},
+        {QStringLiteral("ReverseUndo"), QStringLiteral("false")},
+    };
+}
+
+QMap<QString, QString> GestureConfig::overrides(const QMap<QString, QString> &entries)
+{
+    QMap<QString, QString> builtin = defaults();
+    builtin.insert(tuningDefaults());
+    QMap<QString, QString> result;
+    for (auto it = entries.cbegin(); it != entries.cend(); ++it) {
+        if (it.value() != builtin.value(it.key())) {
+            result.insert(it.key(), it.value());
+        }
+    }
+    return result;
+}
+
 void GestureConfig::load(const QMap<QString, QString> &overrides)
 {
     QMap<QString, QString> merged = defaults();

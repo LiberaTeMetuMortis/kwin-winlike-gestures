@@ -208,6 +208,46 @@ private Q_SLOTS:
         QVERIFY(!Action::parse(QStringLiteral("passthrough")).canUndo());
     }
 
+    void overridesKeepsDeliberateStateKeys()
+    {
+        // A state key equal to its normal gesture was written on purpose: it
+        // must survive, or changing the normal gesture later changes it too.
+        const QMap<QString, QString> entries = {
+            {QStringLiteral("Swipe4Left.Overview"), QStringLiteral("shortcut:kwin/Switch to Next Desktop")},
+            {QStringLiteral("Swipe3Up"), QStringLiteral("command:foo")},
+            {QStringLiteral("Swipe3Up.Overview"), QStringLiteral("command:foo")},
+            // Equal to built-in defaults: dropped.
+            {QStringLiteral("Swipe3Down"), QStringLiteral("shortcut:kwin/Show Desktop")},
+            {QStringLiteral("Swipe3Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},
+            {QStringLiteral("Threshold"), QStringLiteral("30")},
+            {QStringLiteral("ReverseUndo"), QStringLiteral("false")},
+        };
+        const QMap<QString, QString> expected = {
+            {QStringLiteral("Swipe4Left.Overview"), QStringLiteral("shortcut:kwin/Switch to Next Desktop")},
+            {QStringLiteral("Swipe3Up"), QStringLiteral("command:foo")},
+            {QStringLiteral("Swipe3Up.Overview"), QStringLiteral("command:foo")},
+        };
+        QCOMPARE(GestureConfig::overrides(entries), expected);
+    }
+
+    void tuningDefaultsMatchLoad()
+    {
+        // The settings page compares against tuningDefaults(); they must be
+        // what load() falls back to.
+        GestureConfig c;
+        c.load({});
+        const QMap<QString, QString> t = GestureConfig::tuningDefaults();
+        QCOMPARE(t.value(QStringLiteral("Threshold")).toDouble(), c.swipeThreshold());
+        QCOMPARE(t.value(QStringLiteral("PinchThreshold")).toDouble(), c.pinchThreshold());
+        QCOMPARE(t.value(QStringLiteral("SwitcherStep")).toDouble(), c.switcherStep());
+        QCOMPARE(t.value(QStringLiteral("SwitcherStepVertical")).toDouble(), c.switcherStepVertical());
+        QCOMPARE(t.value(QStringLiteral("TriggerTiming")), QStringLiteral("lift"));
+        QCOMPARE(c.triggerTiming(), ActionTrigger::Timing::OnLift);
+        QCOMPARE(t.value(QStringLiteral("TriggerDistance")).toDouble(), c.triggerDistance());
+        QCOMPARE(t.value(QStringLiteral("ReverseUndo")), QStringLiteral("false"));
+        QVERIFY(!c.reverseUndo());
+    }
+
     void badThresholdIgnored()
     {
         GestureConfig c;
