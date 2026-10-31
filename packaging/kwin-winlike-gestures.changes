@@ -1,4 +1,16 @@
 -------------------------------------------------------------------
+Sat Oct 31 15:29:49 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
+
+- Update to version 0.1.1:
+  * Add OBS _service file that downloads the release tarball
+  * OBS: pin libkwin6 instead of kwin6, add changes file
+  * README: point to the published OBS package
+  * Release automatically from git tags via OBS services
+  * Generate the changelog in release.sh; OBS extracts it from git
+  * Document the release.sh + OBS automation
+  * Fix the osc token command (needs --operation runservice)
+
+-------------------------------------------------------------------
 Sat Oct 31 15:20:00 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
 
 - Initial package, version 0.1.0
