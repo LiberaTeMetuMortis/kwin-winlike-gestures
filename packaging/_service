@@ -5,8 +5,8 @@
     OBS source services. Runs when GitHub Actions triggers OBS after a v* tag
     passes CI (see .github/workflows/build.yml):
       obs_scm      checks out main from GitHub, takes the version from the
-                   newest v* tag, extracts the spec from the repo, and adds
-                   the commit messages since the last release to .changes
+                   newest v* tag, and extracts the spec and .changes from
+                   the repo (release.sh writes the .changes entry)
       tar, recompress, set_version   (at build time) turn the checkout into
                    kwin-winlike-gestures-<version>.tar.gz and write the
                    version into the spec
@@ -21,8 +21,7 @@
     <param name="versionformat">@PARENT_TAG@</param>
     <param name="versionrewrite-pattern">v(.*)</param>
     <param name="extract">packaging/kwin-winlike-gestures.spec</param>
-    <param name="changesgenerate">enable</param>
-    <param name="changesauthor">78408599+LiberaTeMetuMortis@users.noreply.github.com</param>
+    <param name="extract">packaging/kwin-winlike-gestures.changes</param>
   </service>
   <service name="tar" mode="buildtime"/>
   <service name="recompress" mode="buildtime">
