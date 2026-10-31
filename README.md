@@ -561,12 +561,16 @@ Then in the web UI add the **openSUSE Tumbleweed** repository to the project. Fo
 release, update `Version:` in the spec, `osc commit`, and OBS fetches the new tarball and
 rebuilds.
 
-Users install with:
+Users install with (the published package lives at
+[home:MetuMortis/kwin-winlike-gestures](https://build.opensuse.org/package/show/home:MetuMortis/kwin-winlike-gestures),
+built for Tumbleweed and Slowroll, x86_64):
 
 ```sh
-sudo zypper addrepo https://download.opensuse.org/repositories/home:<you>/openSUSE_Tumbleweed/home:<you>.repo
+sudo zypper addrepo https://download.opensuse.org/repositories/home:MetuMortis/openSUSE_Tumbleweed/home:MetuMortis.repo
 sudo zypper in kwin-winlike-gestures
 ```
+
+(Slowroll: replace `openSUSE_Tumbleweed` with `openSUSE_Slowroll` in both places.)
 
 To test the spec locally before uploading:
 
