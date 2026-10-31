@@ -20,6 +20,10 @@ jobs:
       - name: Install dependencies
         run: |
           zypper --non-interactive refresh
+          # The container image and the repo mirror can be from different
+          # snapshots (e.g. image with libglib 2.90, repo glib2-devel still 2.88);
+          # dup first so the installed packages match the repo, downgrading if needed.
+          zypper --non-interactive dup --allow-vendor-change
           zypper --non-interactive install --no-recommends \
             git tar gzip cmake gcc-c++ kf6-extra-cmake-modules kwin6-devel \
             qt6-base-private-devel qt6-declarative-devel qt6-dbus-devel qt6-test-devel \
