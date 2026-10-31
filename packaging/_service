@@ -2,9 +2,32 @@
     SPDX-FileCopyrightText: 2026 LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
     SPDX-License-Identifier: GPL-2.0-or-later
 
-    OBS source service: downloads Source0 (the GitHub tarball for tag
-    v%{version}) named in kwin-winlike-gestures.spec.
+    OBS source services. Runs when GitHub Actions triggers OBS after a v* tag
+    passes CI (see .github/workflows/build.yml):
+      obs_scm      checks out main from GitHub, takes the version from the
+                   newest v* tag, extracts the spec from the repo, and adds
+                   the commit messages since the last release to .changes
+      tar, recompress, set_version   (at build time) turn the checkout into
+                   kwin-winlike-gestures-<version>.tar.gz and write the
+                   version into the spec
 -->
 <services>
-  <service name="download_files"/>
+  <service name="obs_scm">
+    <param name="url">https://github.com/LiberaTeMetuMortis/kwin-winlike-gestures.git</param>
+    <param name="scm">git</param>
+    <param name="revision">main</param>
+    <param name="filename">kwin-winlike-gestures</param>
+    <param name="match-tag">v*</param>
+    <param name="versionformat">@PARENT_TAG@</param>
+    <param name="versionrewrite-pattern">v(.*)</param>
+    <param name="extract">packaging/kwin-winlike-gestures.spec</param>
+    <param name="changesgenerate">enable</param>
+    <param name="changesauthor">78408599+LiberaTeMetuMortis@users.noreply.github.com</param>
+  </service>
+  <service name="tar" mode="buildtime"/>
+  <service name="recompress" mode="buildtime">
+    <param name="file">*.tar</param>
+    <param name="compression">gz</param>
+  </service>
+  <service name="set_version" mode="buildtime"/>
 </services>

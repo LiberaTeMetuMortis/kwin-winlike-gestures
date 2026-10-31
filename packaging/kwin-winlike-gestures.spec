@@ -6,12 +6,14 @@
 #
 
 Name:           kwin-winlike-gestures
-Version:        0.1.0
+# Set by OBS's set_version service from the newest v* git tag.
+Version:        0
 Release:        0
 Summary:        Configurable Windows-style touchpad gestures for KWin
 License:        GPL-2.0-or-later
 URL:            https://github.com/LiberaTeMetuMortis/kwin-winlike-gestures
-Source0:        %{url}/archive/v%{version}/%{name}-%{version}.tar.gz
+# Made by OBS's obs_scm + tar services from the git checkout.
+Source0:        %{name}-%{version}.tar.gz
 BuildRequires:  cmake >= 3.22
 BuildRequires:  gcc-c++
 BuildRequires:  kf6-extra-cmake-modules

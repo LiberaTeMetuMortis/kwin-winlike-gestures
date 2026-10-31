@@ -43,3 +43,39 @@ jobs:
 
       - name: Install (into a staging dir)
         run: DESTDIR="$PWD/stage" cmake --install build
+
+  # Release: pushing a vX.Y.Z tag that passes the build above tells OBS to
+  # fetch main, take the version from the tag, update .changes from the
+  # commit messages, and rebuild the package. Needs the OBS_TOKEN secret
+  # (osc token --create home:MetuMortis kwin-winlike-gestures).
+  obs-release:
+    needs: tumbleweed
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the tag is the tip of main
+        # OBS builds main and names it after the newest tag, so they must match.
+        run: |
+          git fetch origin main
+          tag_commit=$(git rev-parse "${GITHUB_REF}^{commit}")
+          main_commit=$(git rev-parse origin/main)
+          if [ "$tag_commit" != "$main_commit" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} ($tag_commit) is not the tip of main ($main_commit). Push main first, then tag its newest commit."
+            exit 1
+          fi
+
+      - name: Trigger OBS
+        env:
+          OBS_TOKEN: ${{ secrets.OBS_TOKEN }}
+        run: |
+          if [ -z "$OBS_TOKEN" ]; then
+            echo "::error::The OBS_TOKEN secret is not set (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Token $OBS_TOKEN" \
+            "https://api.opensuse.org/trigger/runservice?project=home:MetuMortis&package=kwin-winlike-gestures"
