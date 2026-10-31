@@ -44,9 +44,9 @@ jobs:
       - name: Install (into a staging dir)
         run: DESTDIR="$PWD/stage" cmake --install build
 
-  # Release: pushing a vX.Y.Z tag that passes the build above tells OBS to
-  # fetch main, take the version from the tag, update .changes from the
-  # commit messages, and rebuild the package. Needs the OBS_TOKEN secret
+  # Release: pushing a vX.Y.Z tag (release.sh does this) that passes the build
+  # above tells OBS to fetch main, take the version from the tag and the spec
+  # and .changes from the repo, and rebuild the package. Needs the OBS_TOKEN secret
   # (osc token --create --operation runservice home:MetuMortis kwin-winlike-gestures).
   obs-release:
     needs: tumbleweed
