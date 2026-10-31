@@ -47,7 +47,7 @@ jobs:
   # Release: pushing a vX.Y.Z tag that passes the build above tells OBS to
   # fetch main, take the version from the tag, update .changes from the
   # commit messages, and rebuild the package. Needs the OBS_TOKEN secret
-  # (osc token --create home:MetuMortis kwin-winlike-gestures).
+  # (osc token --create --operation runservice home:MetuMortis kwin-winlike-gestures).
   obs-release:
     needs: tumbleweed
     if: startsWith(github.ref, 'refs/tags/v')

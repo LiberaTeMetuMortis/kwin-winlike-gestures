@@ -581,9 +581,9 @@ disable the project's other repositories, which don't have Plasma 6).
 
 1. Create a token that may only re-run this package's services:
    ```sh
-   osc token --create home:MetuMortis kwin-winlike-gestures
+   osc token --create --operation runservice home:MetuMortis kwin-winlike-gestures
    ```
-   It prints a `<string>`; that's the token.
+   It prints an XML status; the value of `<data name="token">` is the token.
 2. On GitHub: **Settings → Secrets and variables → Actions → New repository secret**,
    name `OBS_TOKEN`, value the token.
 
