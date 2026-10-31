@@ -16,10 +16,49 @@ here copy a Windows precision touchpad.
 
 Built and tested against **KWin / Plasma 6.8.1** on openSUSE Tumbleweed.
 
-**openSUSE Tumbleweed:** install the package from OBS (rebuilt automatically for every
-KWin update; see [Shipping](#shipping)), then turn it on in **System Settings → Mouse &
-Touchpad → Touchpad Gestures**. **Arch, Fedora, Debian/Ubuntu and others:**
-[install the dependencies](#dependencies), then run `./install.sh`.
+---
+
+## Install
+
+### openSUSE Tumbleweed and Slowroll (recommended)
+
+Ready-made packages come from the
+[openSUSE Build Service](https://build.opensuse.org/package/show/home:MetuMortis/kwin-winlike-gestures).
+They're rebuilt automatically whenever openSUSE updates KWin, so the plugin always
+matches your Plasma version.
+
+**1. Add the repository and install:**
+
+```sh
+sudo zypper addrepo https://download.opensuse.org/repositories/home:MetuMortis/openSUSE_Tumbleweed/home:MetuMortis.repo
+sudo zypper refresh
+sudo zypper in kwin-winlike-gestures
+```
+
+On **Slowroll**, use `openSUSE_Slowroll` instead of `openSUSE_Tumbleweed` in the first
+line (both places).
+
+`zypper refresh` asks whether to trust the repository's signing key. Check that it says
+**`home:MetuMortis OBS Project`** and answer **`a`** (always), so updates install without
+asking again.
+
+**2. Turn it on:** open **System Settings → Mouse & Touchpad → Touchpad Gestures**, switch
+on **Touchpad gestures** and press **Apply**. It starts working right away and loads
+automatically at every login from then on. The plugin is off after installing so that it
+never changes your gestures until you choose to.
+
+**Updates** arrive with your normal system updates (`sudo zypper up`, or Discover).
+
+**To remove it:** switch it off in the settings page first, then
+`sudo zypper rm kwin-winlike-gestures`. To also drop the repository:
+`sudo zypper removerepo home_MetuMortis`.
+
+### Arch, Fedora, Debian/Ubuntu and others
+
+There are no packages for these yet. Build it from source:
+[install the dependencies](#dependencies) for your distro, then run `./install.sh`
+(see [Installing and enabling](#installing-and-enabling)). After every Plasma update, run
+`./install.sh` again: the plugin has to match your exact KWin version.
 
 ---
 
