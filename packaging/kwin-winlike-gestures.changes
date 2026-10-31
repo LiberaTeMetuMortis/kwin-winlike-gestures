@@ -1,4 +1,15 @@
 -------------------------------------------------------------------
+Sat Oct 31 17:04:07 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
+
+- Update to version 0.1.3:
+  * Packaging: rpmlint filter for the settings page launcher, extract packaging files by glob
+  * Update README
+  * README: step-by-step install for Arch, Fedora, Debian/Ubuntu and other distros
+  * Add swipe back to undo for mid-swipe actions
+  * Settings page: KDE-style (i) help tooltips
+  * Settings page: state rows show the action they actually run
+
+-------------------------------------------------------------------
 Sat Oct 31 15:57:55 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
 
 - Update to version 0.1.2:
