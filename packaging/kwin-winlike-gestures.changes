@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Sat Oct 31 22:02:45 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
+
+- Update to version 0.1.4:
+  * While Overview is open, ignore .Desktop rules
+  * Swipe back to undo: stop when the other direction has nothing to run
+  * Settings page: keep state rows that match the normal gesture
+  * Swipe 4 fingers left for the previous desktop, right for the next
+
+-------------------------------------------------------------------
 Sat Oct 31 17:04:07 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
 
 - Update to version 0.1.3:
