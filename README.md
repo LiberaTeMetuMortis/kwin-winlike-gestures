@@ -34,9 +34,9 @@ Every binding can be changed in **System Settings → Mouse & Touchpad → Touch
 Gestures** (see [Settings page](#settings-page)) or in the config file (see
 [Configuration](#configuration)).
 
----
-<img width="926" height="1396" alt="image" src="https://github.com/user-attachments/assets/7556de5a-d93c-4a41-914d-859f899a05de" />
+<img width="463" alt="The Touchpad Gestures settings page" src="https://github.com/user-attachments/assets/7556de5a-d93c-4a41-914d-859f899a05de" />
 
+---
 
 ## Install
 
@@ -73,15 +73,83 @@ never changes your gestures until you choose to.
 `sudo zypper rm kwin-winlike-gestures`. To also drop the repository:
 `sudo zypper removerepo home_MetuMortis`.
 
-### Arch, Fedora, Debian/Ubuntu and others
+### Arch, Fedora, Debian/Ubuntu and other distros (build from source)
 
-There are no packages for these yet. Build it from source:
-[install the dependencies](#dependencies) for your distro, then run `./install.sh`
-(see [Installing and enabling](#installing-and-enabling)). After every Plasma update, run
-`./install.sh` again: the plugin has to match your exact KWin version.
+There are no ready-made packages for these yet, so you build the plugin yourself. It only
+takes a couple of minutes. You need **Plasma 6 on Wayland**.
+
+**1. Install the build dependencies** for your distro. These only add compilers, headers
+and build files; nothing on your running desktop changes.
+
+**Arch Linux / Manjaro / EndeavourOS** (Arch doesn't split off dev packages; the `kwin`
+package already contains its headers):
+
+```sh
+sudo pacman -S --needed base-devel git cmake extra-cmake-modules kwin \
+    kcmutils ki18n kconfig kcoreaddons kwindowsystem \
+    qt6-base qt6-declarative wayland libepoxy libdrm vulkan-headers
+```
+
+**Fedora** (KDE Plasma edition or spin, Fedora 40 or newer):
+
+```sh
+sudo dnf install git cmake gcc-c++ extra-cmake-modules kwin-devel \
+    kf6-kcmutils-devel kf6-ki18n-devel kf6-kconfig-devel kf6-kcoreaddons-devel \
+    kf6-kwindowsystem-devel qt6-qtbase-devel qt6-qtbase-private-devel \
+    qt6-qtdeclarative-devel libepoxy-devel libdrm-devel vulkan-loader-devel \
+    vulkan-headers wayland-devel
+```
+
+**Debian 13 (trixie) or newer / Kubuntu 24.10 or newer / KDE neon:**
+
+```sh
+sudo apt install git cmake g++ extra-cmake-modules kwin-dev \
+    libkf6kcmutils-dev libkf6i18n-dev libkf6config-dev libkf6coreaddons-dev \
+    libkf6windowsystem-dev qt6-base-dev qt6-base-private-dev qt6-declarative-dev \
+    libepoxy-dev libdrm-dev libvulkan-dev libwayland-dev
+```
+
+Kubuntu 24.04 LTS and Debian 12 ship Plasma 5, which this plugin doesn't support.
+
+**openSUSE** (if you'd rather build than use the package above):
+
+```sh
+sudo zypper in git kwin6-devel kf6-extra-cmake-modules kf6-kconfig-devel \
+    kf6-kglobalaccel-devel kf6-kcoreaddons-devel kf6-kwindowsystem-devel \
+    qt6-base-private-devel qt6-dbus-devel qt6-declarative-devel libinput-devel \
+    kf6-kcmutils-devel kf6-ki18n-devel cmake gcc-c++
+```
+
+Other distros: install your distro's KWin development package plus the KF6 and Qt 6
+development packages for the same libraries as above. If something is missing, CMake
+names it when `./install.sh` configures the build.
+
+Only the openSUSE list has been tested. The others come from each distro's KWin
+packaging; please open an issue if your distro needs a correction.
+
+**2. Download, build and install** (run as your normal user, **not** with `sudo`; it asks
+for your password only for the copy step):
+
+```sh
+git clone https://github.com/LiberaTeMetuMortis/kwin-winlike-gestures.git
+cd kwin-winlike-gestures
+./install.sh
+```
+
+When it's done, log out and back in if it tells you to.
+
+**3. Turn it on:** open **System Settings → Mouse & Touchpad → Touchpad Gestures**, switch
+on **Touchpad gestures** and press **Apply**.
+
+**After every Plasma update**, update your system (which updates the KWin development
+package along with KWin), then run `./install.sh` again from the same folder (`git pull`
+first to get the latest version). The plugin has to be built for your exact KWin version;
+until you rebuild, KWin refuses the old one and you get Plasma's default gestures back.
+
+**To remove it:** `./uninstall.sh` (see [Uninstall](#uninstall)).
 
 ---
-`
+
 ## How it works
 
 ### Why a KWin plugin
@@ -259,52 +327,7 @@ The code is split in two layers on purpose:
 
 ### Dependencies
 
-You need **Plasma 6 on Wayland** and the development files for the KWin you're running.
-These packages only add headers and build files; nothing on the running desktop changes.
-
-**openSUSE Tumbleweed** (tested):
-
-```sh
-sudo zypper in kwin6-devel kf6-extra-cmake-modules kf6-kconfig-devel \
-    kf6-kglobalaccel-devel kf6-kcoreaddons-devel kf6-kwindowsystem-devel \
-    qt6-base-private-devel qt6-dbus-devel qt6-declarative-devel libinput-devel \
-    kf6-kcmutils-devel kf6-ki18n-devel cmake gcc-c++
-```
-
-**Arch Linux / Manjaro / EndeavourOS** (Arch doesn't split off dev packages; the `kwin`
-package already contains its headers):
-
-```sh
-sudo pacman -S --needed base-devel cmake extra-cmake-modules kwin \
-    kcmutils ki18n kconfig kcoreaddons kwindowsystem \
-    qt6-base qt6-declarative vulkan-headers
-```
-
-**Fedora** (KDE Plasma spin, Fedora 40 or newer):
-
-```sh
-sudo dnf install cmake gcc-c++ extra-cmake-modules kwin-devel \
-    kf6-kcmutils-devel kf6-ki18n-devel kf6-kconfig-devel kf6-kcoreaddons-devel \
-    kf6-kwindowsystem-devel qt6-qtbase-devel qt6-qtbase-private-devel \
-    qt6-qtdeclarative-devel libepoxy-devel libdrm-devel vulkan-loader-devel \
-    vulkan-headers wayland-devel
-```
-
-**Debian 13 (trixie) or newer / Kubuntu 24.10 or newer / KDE neon:**
-
-```sh
-sudo apt install cmake g++ extra-cmake-modules kwin-dev \
-    libkf6kcmutils-dev libkf6i18n-dev libkf6config-dev libkf6coreaddons-dev \
-    libkf6windowsystem-dev qt6-base-dev qt6-base-private-dev qt6-declarative-dev \
-    libepoxy-dev libdrm-dev libvulkan-dev libwayland-dev
-```
-
-Kubuntu 24.04 LTS and Debian 12 ship Plasma 5, which this plugin doesn't support.
-
-Only the openSUSE list has been tested. The others come from each distro's KWin
-packaging (Debian's `kwin-dev`, Fedora's `kwin-devel`, Arch's `kwin` file list); if one is
-missing something, CMake names the missing package when you configure. Please open an
-issue if your distro needs a correction.
+The per-distro package lists are in [Install](#arch-fedora-debianubuntu-and-other-distros-build-from-source).
 
 Notes:
 
@@ -332,6 +355,9 @@ Outputs:
 | `build/bin/plasma/kcms/systemsettings/kcm_winlikegestures.so` (settings page) | `/usr/lib64/qt6/plugins/plasma/kcms/systemsettings/` |
 | `build/kcm/kcm_winlikegestures.desktop` (launcher entry) | `/usr/share/applications/` |
 | `kwin_winlike_gestures.categories` (debug-log switch for KDebugSettings) | `/usr/share/qlogging-categories6/` |
+
+The plugin paths are openSUSE's and Fedora's; Arch uses `/usr/lib/qt6/plugins/` and
+Debian/Ubuntu `/usr/lib/x86_64-linux-gnu/qt6/plugins/`. CMake picks the right one.
 
 Build without the settings page with `-DBUILD_KCM=OFF`.
 
@@ -407,13 +433,15 @@ Qt doesn't actually unload a plugin's code from memory, so `UnloadPlugin` +
 KWin's internal API isn't stable, and plugins must be rebuilt for each KWin release:
 
 ```sh
-sudo zypper in kwin6-devel            # update it to match the new KWin
+# 1. update the KWin development package to match the new KWin
+#    (zypper: kwin6-devel, dnf: kwin-devel, apt: kwin-dev; on Arch it's part of kwin)
+# 2. rebuild and install
 rm -rf build && cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr && cmake --build build
 ctest --test-dir build
 sudo cmake --install build
 ```
 
-(or just `./install.sh`, after updating `kwin6-devel`)
+(or just `./install.sh`, after the system update)
 
 Then log out and back in. If KWin's headers changed, the build fails, and the small
 `gesturefilter.cpp` / `winlikeplugin.cpp` layer is where to adapt. Until you rebuild, a
@@ -431,7 +459,7 @@ Run it as your normal user, **not** with `sudo`. It turns the plugin off in `kwi
 unloads it from the running KWin, and removes every installed file. CMake writes the
 list of installed paths for your distro to `build/installed-files.txt`, so nothing is
 hardcoded. Plasma's own gestures come back immediately; log out and back in to fully
-unload the old code. If you installed the OBS package instead, use
+unload the old code. If you installed the openSUSE package instead, use
 `sudo zypper rm kwin-winlike-gestures`.
 
 ### Recovery if KWin crashes at login
