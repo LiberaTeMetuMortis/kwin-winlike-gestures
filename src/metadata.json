@@ -1,0 +1,7 @@
+{
+    "KPlugin": {
+        "Name": "Windows-like touchpad gestures",
+        "Description": "Configurable 3/4-finger touchpad gestures with Windows-style defaults",
+        "EnabledByDefault": false
+    }
+}

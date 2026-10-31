@@ -1,0 +1,7 @@
+/build/
+/output
+/session
+*.user
+.vscode/
+.idea/
+/CLAUDE.md

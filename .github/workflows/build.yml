@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: 2026 LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# Builds and tests against the newest KWin in openSUSE Tumbleweed. The weekly
+# run catches Plasma updates that change KWin's internal API.
+name: Build
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  tumbleweed:
+    runs-on: ubuntu-latest
+    container: opensuse/tumbleweed
+    steps:
+      - name: Install dependencies
+        run: |
+          zypper --non-interactive refresh
+          zypper --non-interactive install --no-recommends \
+            git tar gzip cmake gcc-c++ kf6-extra-cmake-modules kwin6-devel \
+            qt6-base-private-devel qt6-declarative-devel qt6-dbus-devel qt6-test-devel \
+            kf6-kconfig-devel kf6-kcoreaddons-devel kf6-kwindowsystem-devel \
+            kf6-kcmutils-devel kf6-ki18n-devel \
+            'pkgconfig(epoxy)' 'pkgconfig(libdrm)' 'pkgconfig(vulkan)' 'pkgconfig(wayland-server)'
+
+      - uses: actions/checkout@v4
+
+      - name: KWin version
+        run: rpm -q kwin6
+
+      - name: Build
+        run: |
+          cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake --build build -j"$(nproc)"
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Install (into a staging dir)
+        run: DESTDIR="$PWD/stage" cmake --install build

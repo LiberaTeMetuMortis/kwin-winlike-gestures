@@ -1,0 +1,9 @@
+{
+    "KPlugin": {
+        "Name": "Touchpad Gestures",
+        "Description": "Windows-style three and four finger touchpad gestures",
+        "Icon": "input-touchpad"
+    },
+    "X-KDE-System-Settings-Parent-Category": "pointing-devices",
+    "X-KDE-Keywords": "gesture,gestures,swipe,pinch,touchpad,trackpad,three finger,four finger,overview,alt tab,switcher,virtual desktop"
+}
