@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Sat Oct 31 23:15:07 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
+
+- Update to version 0.2.0:
+  * Swipes can use Plasma's own gestures, which follow the fingers
+  * README: settings page screenshot with the new defaults, kept in the repo
+
+-------------------------------------------------------------------
 Sat Oct 31 22:02:45 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
 
 - Update to version 0.1.4:
