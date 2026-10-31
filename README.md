@@ -18,7 +18,8 @@ Built and tested against **KWin / Plasma 6.8.1** on openSUSE Tumbleweed.
 
 **openSUSE Tumbleweed:** install the package from OBS (rebuilt automatically for every
 KWin update; see [Shipping](#shipping)), then turn it on in **System Settings → Mouse &
-Touchpad → Touchpad Gestures**. **Other distros:** [build it from source](#building).
+Touchpad → Touchpad Gestures**. **Arch, Fedora, Debian/Ubuntu and others:**
+[install the dependencies](#dependencies), then run `./install.sh`.
 
 ---
 
@@ -214,7 +215,12 @@ The code is split in two layers on purpose:
 
 ## Building
 
-### Dependencies (openSUSE Tumbleweed)
+### Dependencies
+
+You need **Plasma 6 on Wayland** and the development files for the KWin you're running.
+These packages only add headers and build files; nothing on the running desktop changes.
+
+**openSUSE Tumbleweed** (tested):
 
 ```sh
 sudo zypper in kwin6-devel kf6-extra-cmake-modules kf6-kconfig-devel \
@@ -223,14 +229,50 @@ sudo zypper in kwin6-devel kf6-extra-cmake-modules kf6-kconfig-devel \
     kf6-kcmutils-devel kf6-ki18n-devel cmake gcc-c++
 ```
 
-These only add headers and build files; nothing on the running desktop changes.
-`qt6-declarative-devel` (Qt Quick) is needed because KWin's CMake package depends on it,
-even though this plugin doesn't use QML. On other distros, install the equivalent
-KWin, KF6 and Qt6 development packages.
+**Arch Linux / Manjaro / EndeavourOS** (Arch doesn't split off dev packages; the `kwin`
+package already contains its headers):
 
-**`kwin6-devel` must match your installed KWin version exactly.** The plugin interface ID
-contains the version (`org.kde.kwin.PluginFactoryInterface6.8.1`), and KWin refuses
-plugins built for another version.
+```sh
+sudo pacman -S --needed base-devel cmake extra-cmake-modules kwin \
+    kcmutils ki18n kconfig kcoreaddons kwindowsystem \
+    qt6-base qt6-declarative vulkan-headers
+```
+
+**Fedora** (KDE Plasma spin, Fedora 40 or newer):
+
+```sh
+sudo dnf install cmake gcc-c++ extra-cmake-modules kwin-devel \
+    kf6-kcmutils-devel kf6-ki18n-devel kf6-kconfig-devel kf6-kcoreaddons-devel \
+    kf6-kwindowsystem-devel qt6-qtbase-devel qt6-qtbase-private-devel \
+    qt6-qtdeclarative-devel libepoxy-devel libdrm-devel vulkan-loader-devel \
+    vulkan-headers wayland-devel
+```
+
+**Debian 13 (trixie) or newer / Kubuntu 24.10 or newer / KDE neon:**
+
+```sh
+sudo apt install cmake g++ extra-cmake-modules kwin-dev \
+    libkf6kcmutils-dev libkf6i18n-dev libkf6config-dev libkf6coreaddons-dev \
+    libkf6windowsystem-dev qt6-base-dev qt6-base-private-dev qt6-declarative-dev \
+    libepoxy-dev libdrm-dev libvulkan-dev libwayland-dev
+```
+
+Kubuntu 24.04 LTS and Debian 12 ship Plasma 5, which this plugin doesn't support.
+
+Only the openSUSE list has been tested. The others come from each distro's KWin
+packaging (Debian's `kwin-dev`, Fedora's `kwin-devel`, Arch's `kwin` file list); if one is
+missing something, CMake names the missing package when you configure. Please open an
+issue if your distro needs a correction.
+
+Notes:
+
+* Qt Quick (`qt6-declarative`) and the epoxy, DRM, Vulkan and Wayland headers are needed
+  because **KWin's own CMake package** looks for them, even though this plugin doesn't use
+  them directly. Some distros' KWin dev packages don't pull them in.
+* **The KWin development files must match your installed KWin version exactly.** The plugin
+  interface ID contains the version (`org.kde.kwin.PluginFactoryInterface6.8.1`), and KWin
+  refuses plugins built for another version. Install them from the same repositories as
+  your KWin and rebuild after every Plasma update.
 
 ### Build and test
 

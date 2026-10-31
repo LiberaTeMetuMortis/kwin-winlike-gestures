@@ -30,7 +30,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: KWin version
-        run: rpm -q kwin6
+        # kwin6-devel pulls in libkwin6, not the kwin6 compositor package.
+        run: rpm -q kwin6-devel libkwin6
 
       - name: Build
         run: |
