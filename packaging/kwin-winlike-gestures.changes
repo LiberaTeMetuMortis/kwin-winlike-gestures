@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Sat Oct 31 15:57:55 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
+
+- Update to version 0.1.2:
+  * README: add install instructions for the OBS packages
+  * CI: fix the release job comment (.changes comes from release.sh)
+  * Settings page: fetch KWin's shortcut list once, and only when shown
+
+-------------------------------------------------------------------
 Sat Oct 31 15:29:49 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
 
 - Update to version 0.1.1:
