@@ -15,6 +15,8 @@ RowLayout {
     id: row
 
     required property string key
+    // Optional explanation shown by an (i) icon at the end of the row.
+    property string helpText
     // State rows ("Swipe3Down.Overview") get a "Same as usual" choice.
     readonly property bool isStateRow: key.indexOf(".") !== -1
     readonly property string spec: (kcm.revision, kcm.value(key))
@@ -67,11 +69,11 @@ RowLayout {
         return -1;
     }
 
-    enabled: kcm.pluginEnabled
     spacing: Kirigami.Units.smallSpacing
 
     QQC2.ComboBox {
         id: actionBox
+        enabled: kcm.pluginEnabled
         Layout.preferredWidth: Kirigami.Units.gridUnit * 16
         textRole: "text"
         model: row.choices
@@ -91,6 +93,7 @@ RowLayout {
     }
 
     QQC2.ComboBox {
+        enabled: kcm.pluginEnabled
         visible: row.customKind === "shortcut"
         Layout.preferredWidth: Kirigami.Units.gridUnit * 16
         // Only rows showing the picker need the list (it's fetched from KWin).
@@ -100,10 +103,16 @@ RowLayout {
     }
 
     QQC2.TextField {
+        enabled: kcm.pluginEnabled
         visible: row.customKind === "command"
         Layout.preferredWidth: Kirigami.Units.gridUnit * 16
         placeholderText: i18nc("@info:placeholder", "Command, e.g. dolphin")
         text: visible ? row.spec.slice("command:".length) : ""
         onTextEdited: kcm.setValue(row.key, "command:" + text)
+    }
+
+    Kirigami.ContextualHelpButton {
+        visible: row.helpText !== ""
+        toolTipText: row.helpText
     }
 }
