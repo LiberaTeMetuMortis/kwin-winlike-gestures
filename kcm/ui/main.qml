@@ -85,7 +85,7 @@ KCM.SimpleKCM {
         GestureRow {
             key: "Swipe4Left"
             Kirigami.FormData.label: i18nc("@label", "Left:")
-            helpText: i18nc("@info:tooltip", "The content follows your fingers: swiping left brings in the next desktop. Next and previous work with any desktop layout, including desktops arranged in rows.")
+            helpText: i18nc("@info:tooltip", "Swiping left goes to the desktop on the left (previous), swiping right to the next one. Next and previous work with any desktop layout, including desktops arranged in rows.")
         }
         GestureRow { key: "Swipe4Right"; Kirigami.FormData.label: i18nc("@label", "Right:") }
 

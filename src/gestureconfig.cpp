@@ -95,10 +95,10 @@ QMap<QString, QString> GestureConfig::defaults()
         {QStringLiteral("Swipe3Right"), QStringLiteral("switcher")},
         {QStringLiteral("Swipe4Up"), QStringLiteral("shortcut:kwin/Overview")},
         {QStringLiteral("Swipe4Down"), QStringLiteral("shortcut:kwin/Show Desktop")},
-        // Content follows the fingers: swiping left brings in the next desktop.
+        // Swiping left goes to the desktop on the left (previous), right to the next one.
         // Next/Previous rather than Left/Right so it works with any desktop grid.
-        {QStringLiteral("Swipe4Left"), QStringLiteral("shortcut:kwin/Switch to Next Desktop")},
-        {QStringLiteral("Swipe4Right"), QStringLiteral("shortcut:kwin/Switch to Previous Desktop")},
+        {QStringLiteral("Swipe4Left"), QStringLiteral("shortcut:kwin/Switch to Previous Desktop")},
+        {QStringLiteral("Swipe4Right"), QStringLiteral("shortcut:kwin/Switch to Next Desktop")},
         // Up and down undo each other, like on Windows. Both shortcuts toggle.
         {QStringLiteral("Swipe3Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},
         {QStringLiteral("Swipe4Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},

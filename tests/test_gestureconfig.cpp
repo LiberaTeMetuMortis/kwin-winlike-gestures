@@ -50,7 +50,9 @@ private Q_SLOTS:
         QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left).kind, Action::Kind::Switcher);
         QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Right).kind, Action::Kind::Switcher);
         QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Up).name, QStringLiteral("Overview"));
-        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Left).name, QStringLiteral("Switch to Next Desktop"));
+        // Swiping left goes to the desktop on the left, like moving along the row.
+        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Left).name, QStringLiteral("Switch to Previous Desktop"));
+        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Right).name, QStringLiteral("Switch to Next Desktop"));
         QVERIFY(!c.action(GestureType::Pinch, 2, Direction::In).handled());
         QVERIFY(!c.action(GestureType::Swipe, 5, Direction::Up).handled());
         QCOMPARE(c.switcherStep(), 100.0);
@@ -213,7 +215,7 @@ private Q_SLOTS:
         // A state key equal to its normal gesture was written on purpose: it
         // must survive, or changing the normal gesture later changes it too.
         const QMap<QString, QString> entries = {
-            {QStringLiteral("Swipe4Left.Overview"), QStringLiteral("shortcut:kwin/Switch to Next Desktop")},
+            {QStringLiteral("Swipe4Left.Overview"), QStringLiteral("shortcut:kwin/Switch to Previous Desktop")},
             {QStringLiteral("Swipe3Up"), QStringLiteral("command:foo")},
             {QStringLiteral("Swipe3Up.Overview"), QStringLiteral("command:foo")},
             // Equal to built-in defaults: dropped.
@@ -223,7 +225,7 @@ private Q_SLOTS:
             {QStringLiteral("ReverseUndo"), QStringLiteral("false")},
         };
         const QMap<QString, QString> expected = {
-            {QStringLiteral("Swipe4Left.Overview"), QStringLiteral("shortcut:kwin/Switch to Next Desktop")},
+            {QStringLiteral("Swipe4Left.Overview"), QStringLiteral("shortcut:kwin/Switch to Previous Desktop")},
             {QStringLiteral("Swipe3Up"), QStringLiteral("command:foo")},
             {QStringLiteral("Swipe3Up.Overview"), QStringLiteral("command:foo")},
         };

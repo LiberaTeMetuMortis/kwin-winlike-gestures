@@ -27,7 +27,7 @@ Built and tested against **KWin / Plasma 6.8.1** on openSUSE Tumbleweed.
 | 3-finger swipe left / right | **Alt+Tab switcher.** Opens and stays open while your fingers are down; keep sliding left/right/up/down to move the selection (like the arrow keys); lift to switch. A quick flick jumps to the previous window. |
 | 4-finger swipe up | Same as 3-finger up (including the desktop-shown rule) |
 | 4-finger swipe down | Same as 3-finger down (including the Overview rule) |
-| 4-finger swipe left / right | Next / previous virtual desktop (content follows your fingers) |
+| 4-finger swipe left / right | Previous / next virtual desktop (left goes to the desktop on the left) |
 | 2-finger scroll, pinch-zoom, 2-finger tap | Untouched: handled by libinput and apps, already like Windows |
 
 Every binding can be changed in **System Settings → Mouse & Touchpad → Touchpad
@@ -215,7 +215,7 @@ gesture, unless **swipe back to undo** is on (`ReverseUndo=true`, mid-swipe only
 moving back the other way by `TriggerDistance` from the furthest point, without lifting,
 runs the **opposite direction's** binding with the desktop state as it is *now*. After
 3 fingers up opened Overview, swiping back down runs "3 fingers down while Overview is
-open" (close Overview); after 4 fingers left (next desktop), swiping back right runs
+open" (close Overview); after 4 fingers right (next desktop), swiping back left runs
 "previous desktop". Moving forward again re-runs the original, so you can go back and
 forth before lifting. Swiping back only works when the opposite direction runs a
 shortcut or command; if it's the window switcher, *Do nothing* or *Leave to Plasma*,
@@ -525,8 +525,8 @@ kwriteconfig6 --notify --file kwinwinlikegesturesrc --group Gestures --key Swipe
 [Gestures]
 # Keys:   Swipe<fingers><Up|Down|Left|Right>, Pinch<fingers><In|Out>
 Swipe3Up=shortcut:kwin/Overview
-Swipe4Left=shortcut:kwin/Switch to Next Desktop
-Swipe4Right=shortcut:kwin/Switch to Previous Desktop
+Swipe4Left=shortcut:kwin/Switch to Previous Desktop
+Swipe4Right=shortcut:kwin/Switch to Next Desktop
 Pinch3In=command:dolphin
 
 # State-specific: wins over the plain key while that state holds
