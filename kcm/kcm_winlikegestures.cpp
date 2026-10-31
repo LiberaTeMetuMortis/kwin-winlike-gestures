@@ -65,12 +65,21 @@ QString KCMWinLikeGestures::defaultValue(const QString &key) const
     if (const auto it = m_defaults.constFind(key); it != m_defaults.cend()) {
         return *it;
     }
-    return key.contains(QLatin1Char('.')) ? QStringLiteral("inherit") : QStringLiteral("passthrough");
+    // A state key ("Swipe3Up.Overview") without its own rule follows the
+    // normal gesture, so the page shows that action rather than "inherit".
+    const int dot = key.indexOf(QLatin1Char('.'));
+    return dot > 0 ? value(key.left(dot)) : QStringLiteral("passthrough");
 }
 
 QString KCMWinLikeGestures::value(const QString &key) const
 {
-    return m_overrides.value(key, defaultValue(key));
+    const QString v = m_overrides.value(key, defaultValue(key));
+    // "inherit" written by hand (or by older versions) means the same.
+    if (v == QLatin1String("inherit")) {
+        const int dot = key.indexOf(QLatin1Char('.'));
+        return dot > 0 ? value(key.left(dot)) : QStringLiteral("passthrough");
+    }
+    return v;
 }
 
 void KCMWinLikeGestures::setValue(const QString &key, const QString &value)

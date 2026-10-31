@@ -96,7 +96,7 @@ KCM.SimpleKCM {
         GestureRow {
             key: "Swipe3Up.Overview"
             Kirigami.FormData.label: i18nc("@label", "Three fingers up:")
-            helpText: i18nc("@info:tooltip", "These replace the normal gestures while Overview is open. \"Same as usual\" keeps the normal one. Overview opens and closes with the same action, so \"Close Overview\" is how a swipe down undoes a swipe up.")
+            helpText: i18nc("@info:tooltip", "These replace the normal gestures while Overview is open. Rows you haven't changed follow the normal gesture above. Overview opens and closes with the same action, so in this section it shows as \"Close Overview\".")
         }
         GestureRow { key: "Swipe3Down.Overview"; Kirigami.FormData.label: i18nc("@label", "Three fingers down:") }
         GestureRow { key: "Swipe4Up.Overview"; Kirigami.FormData.label: i18nc("@label", "Four fingers up:") }
@@ -109,7 +109,7 @@ KCM.SimpleKCM {
         GestureRow {
             key: "Swipe3Up.Desktop"
             Kirigami.FormData.label: i18nc("@label", "Three fingers up:")
-            helpText: i18nc("@info:tooltip", "These replace the normal gestures while the desktop is shown (after Show desktop). \"Same as usual\" keeps the normal one. \"Bring windows back\" restores the windows exactly as they were.")
+            helpText: i18nc("@info:tooltip", "These replace the normal gestures while the desktop is shown (after Show desktop). Rows you haven't changed follow the normal gesture above. Show desktop switches on and off with the same action, so in this section it shows as \"Bring windows back\", which restores the windows exactly as they were.")
         }
         GestureRow { key: "Swipe3Down.Desktop"; Kirigami.FormData.label: i18nc("@label", "Three fingers down:") }
         GestureRow { key: "Swipe4Up.Desktop"; Kirigami.FormData.label: i18nc("@label", "Four fingers up:") }

@@ -487,7 +487,8 @@ kcm_winlikegestures`). It has:
   *While the desktop is shown* states, and 2/3-finger pinch. Choices: Overview, Show
   desktop, Window switcher, Next/Previous virtual desktop, Desktop grid, *Other KWin
   shortcut…* (picker listing every KWin shortcut), *Run command…*, Do nothing, Leave to
-  Plasma or the app, and for state rows *Same as usual*.
+  Plasma or the app. State rows you haven't changed show the normal gesture's action
+  (with Overview open, "Overview" shows as *Close Overview*, since it toggles).
 * **Run actions:** *When fingers lift* (default) or *Mid-swipe, after a set distance*,
   with a slider for that distance, and **Swipe back to undo** (mid-swipe only).
 * Sliders for swipe threshold, switcher sideways step, switcher up/down step and pinch

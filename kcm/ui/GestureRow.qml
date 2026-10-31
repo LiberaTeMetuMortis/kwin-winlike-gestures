@@ -17,8 +17,6 @@ RowLayout {
     required property string key
     // Optional explanation shown by an (i) icon at the end of the row.
     property string helpText
-    // State rows ("Swipe3Down.Overview") get a "Same as usual" choice.
-    readonly property bool isStateRow: key.indexOf(".") !== -1
     readonly property string spec: (kcm.revision, kcm.value(key))
 
     readonly property var presets: [
@@ -40,12 +38,7 @@ RowLayout {
         : key.endsWith(".Desktop")
             ? { "shortcut:kwin/Show Desktop": i18nc("@item:inlistbox", "Bring windows back") }
             : {}
-    readonly property var choices: {
-        const renamed = presets.map(c => stateNames[c.spec] ? Object.assign({}, c, { text: stateNames[c.spec] }) : c);
-        return isStateRow
-            ? [{ text: i18nc("@item:inlistbox", "Same as usual"), spec: "inherit" }].concat(renamed)
-            : renamed;
-    }
+    readonly property var choices: presets.map(c => stateNames[c.spec] ? Object.assign({}, c, { text: stateNames[c.spec] }) : c)
 
     readonly property string customKind: {
         if (choices.some(c => c.spec === spec)) {
