@@ -1,0 +1,10 @@
+<!--
+    SPDX-FileCopyrightText: 2026 LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
+    SPDX-License-Identifier: GPL-2.0-or-later
+
+    OBS source service: downloads Source0 (the GitHub tarball for tag
+    v%{version}) named in kwin-winlike-gestures.spec.
+-->
+<services>
+  <service name="download_files"/>
+</services>

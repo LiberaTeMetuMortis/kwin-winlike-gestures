@@ -552,9 +552,8 @@ One-time setup (needs an account on build.opensuse.org and `sudo zypper in osc`)
 osc checkout home:<you>                       # your home project
 cd home:<you>
 osc mkpac kwin-winlike-gestures && cd kwin-winlike-gestures
-cp ~/kde-gestures/packaging/kwin-winlike-gestures.spec .
-osc service add download_files                # fetches Source0 from GitHub
-osc add kwin-winlike-gestures.spec _service
+cp ~/kde-gestures/packaging/kwin-winlike-gestures.spec ~/kde-gestures/packaging/_service .
+osc add kwin-winlike-gestures.spec _service   # _service fetches Source0 from GitHub
 osc commit -m "Initial package"
 ```
 
