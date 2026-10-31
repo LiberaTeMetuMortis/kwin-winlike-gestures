@@ -121,6 +121,7 @@ void GestureConfig::load(const QMap<QString, QString> &overrides)
     m_triggerTiming = merged.take(QStringLiteral("TriggerTiming")).trimmed() == QLatin1String("midswipe") ? ActionTrigger::Timing::MidSwipe
                                                                                                          : ActionTrigger::Timing::OnLift;
     m_triggerDistance = positiveOr(merged.take(QStringLiteral("TriggerDistance")), 80.0);
+    m_reverseUndo = merged.take(QStringLiteral("ReverseUndo")).trimmed() == QLatin1String("true");
 
     m_bindings.clear();
     for (auto it = merged.cbegin(); it != merged.cend(); ++it) {

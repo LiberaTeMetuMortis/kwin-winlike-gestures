@@ -60,6 +60,8 @@ private:
     SwitcherNavigator m_navigator;
     ActionTrigger m_swipeTrigger;
     ActionTrigger m_pinchTrigger;
+    // Whether this swipe already ran an action (mid-swipe timing).
+    bool m_swipeFired = false;
     bool m_switcherOpen = false;
     // Snapshot taken when the current gesture began, used until it ends.
     States m_states;

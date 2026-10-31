@@ -58,7 +58,7 @@ public:
 
     // Applies overrides. Keys: "Threshold", "PinchThreshold", "SwitcherStep",
     // "SwitcherStepVertical", "TriggerTiming" (lift | midswipe),
-    // "TriggerDistance", and gesture keys.
+    // "TriggerDistance", "ReverseUndo" (true | false), and gesture keys.
     void load(const QMap<QString, QString> &overrides);
 
     Action action(GestureType type, int fingers, Direction direction, States states = {}) const;
@@ -74,6 +74,8 @@ public:
     qreal switcherStepVertical() const { return m_switcherStepVertical; }
     ActionTrigger::Timing triggerTiming() const { return m_triggerTiming; }
     qreal triggerDistance() const { return m_triggerDistance; }
+    // Swipe back to undo (only with mid-swipe timing).
+    bool reverseUndo() const { return m_reverseUndo; }
 
 private:
     QHash<QString, Action> m_bindings;
@@ -84,6 +86,7 @@ private:
     qreal m_switcherStepVertical = 60.0;
     ActionTrigger::Timing m_triggerTiming = ActionTrigger::Timing::OnLift;
     qreal m_triggerDistance = 80.0;
+    bool m_reverseUndo = false;
 };
 
 } // namespace WinLike

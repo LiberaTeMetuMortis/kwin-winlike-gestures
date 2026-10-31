@@ -70,6 +70,18 @@ private Q_SLOTS:
         QCOMPARE(c.triggerTiming(), ActionTrigger::Timing::OnLift);
     }
 
+    void reverseUndo()
+    {
+        GestureConfig c;
+        QVERIFY(!c.reverseUndo());
+        c.load({{QStringLiteral("ReverseUndo"), QStringLiteral("true")}});
+        QVERIFY(c.reverseUndo());
+        c.load({{QStringLiteral("ReverseUndo"), QStringLiteral("false")}});
+        QVERIFY(!c.reverseUndo());
+        c.load({{QStringLiteral("ReverseUndo"), QStringLiteral("maybe")}});
+        QVERIFY(!c.reverseUndo());
+    }
+
     void verticalSwitcherStepOverride()
     {
         GestureConfig c;

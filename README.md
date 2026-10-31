@@ -211,7 +211,13 @@ soon as the fingers have travelled `TriggerDistance` (default 80 units) along th
 direction, so Overview opens while you're still swiping. A swipe that never gets that
 far does nothing. Pinches have no travel distance, so in mid-swipe mode they run as soon
 as the pinch direction locks. `ActionTrigger` makes sure an action fires at most once per
-gesture. A cancelled gesture does nothing. The window switcher follows the fingers live
+gesture, unless **swipe back to undo** is on (`ReverseUndo=true`, mid-swipe only): then
+moving back the other way by `TriggerDistance` from the furthest point, without lifting,
+runs the **opposite direction's** binding with the desktop state as it is *now*. After
+3 fingers up opened Overview, swiping back down runs "3 fingers down while Overview is
+open" (close Overview); after 4 fingers left (next desktop), swiping back right runs
+"previous desktop". Moving forward again re-runs the original, so you can go back and
+forth before lifting. Swipes only; pinches fire once. A cancelled gesture does nothing. The window switcher follows the fingers live
 in either mode.
 
 ### Running actions
@@ -483,7 +489,7 @@ kcm_winlikegestures`). It has:
   shortcut…* (picker listing every KWin shortcut), *Run command…*, Do nothing, Leave to
   Plasma or the app, and for state rows *Same as usual*.
 * **Run actions:** *When fingers lift* (default) or *Mid-swipe, after a set distance*,
-  with a slider for that distance.
+  with a slider for that distance, and **Swipe back to undo** (mid-swipe only).
 * Sliders for swipe threshold, switcher sideways step, switcher up/down step and pinch
   threshold.
 * **Defaults** restores the Windows-style bindings (it leaves the on/off switch alone).
@@ -528,6 +534,7 @@ SwitcherStep=100            # sideways travel per switcher step (Left/Right)
 SwitcherStepVertical=60     # up/down travel per switcher step (Up/Down)
 TriggerTiming=lift          # lift = run actions when fingers lift; midswipe = while swiping
 TriggerDistance=80          # midswipe only: travel before the action runs
+ReverseUndo=false           # midswipe only: swipe back the other way to undo
 ```
 
 | Value | Meaning |

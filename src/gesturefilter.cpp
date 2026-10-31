@@ -122,7 +122,8 @@ bool GestureFilter::swipeGestureBegin(KWin::PointerSwipeGestureBeginEvent *event
     m_swipe.begin(event->fingerCount);
     m_states = currentStates();
     m_swipeMode = modeFor(GestureType::Swipe, event->fingerCount);
-    m_swipeTrigger.configure(m_config->triggerTiming(), m_config->triggerDistance());
+    m_swipeTrigger.configure(m_config->triggerTiming(), m_config->triggerDistance(), m_config->reverseUndo());
+    m_swipeFired = false;
     m_swipeTrigger.begin();
     qCDebug(WINLIKE) << "swipe begin, fingers:" << event->fingerCount << "states:" << m_states.toInt();
     return m_swipeMode == Mode::Owned;
@@ -156,8 +157,19 @@ bool GestureFilter::swipeGestureUpdate(KWin::PointerSwipeGestureUpdateEvent *eve
             stepSwitcher(steps, event->time);
         }
     }
-    if (!m_switcherOpen && m_swipe.direction() != Direction::None && m_swipeTrigger.update(m_swipe.progress())) {
-        finish(GestureType::Swipe, m_swipeMode, m_swipe.fingers(), m_swipe.direction());
+    if (!m_switcherOpen && m_swipe.direction() != Direction::None) {
+        const ActionTrigger::Fire fire = m_swipeTrigger.update(m_swipe.progress());
+        if (fire != ActionTrigger::Fire::None) {
+            // After the first action the desktop has changed (e.g. Overview is
+            // now open), so later ones look at the state as it is now: swiping
+            // back after opening Overview runs "down while Overview is open".
+            if (m_swipeFired) {
+                m_states = currentStates();
+            }
+            m_swipeFired = true;
+            const Direction direction = fire == ActionTrigger::Fire::Reverse ? opposite(m_swipe.direction()) : m_swipe.direction();
+            finish(GestureType::Swipe, m_swipeMode, m_swipe.fingers(), direction);
+        }
     }
     return true;
 }
@@ -217,7 +229,7 @@ bool GestureFilter::pinchGestureUpdate(KWin::PointerPinchGestureUpdateEvent *eve
             m_pinchMode = Mode::Ignored;
         }
     }
-    if (m_pinchMode == Mode::Owned && m_pinch.direction() != Direction::None && m_pinchTrigger.update(1)) {
+    if (m_pinchMode == Mode::Owned && m_pinch.direction() != Direction::None && m_pinchTrigger.update(1) != ActionTrigger::Fire::None) {
         finish(GestureType::Pinch, m_pinchMode, m_pinch.fingers(), m_pinch.direction());
     }
     return m_pinchMode == Mode::Owned;

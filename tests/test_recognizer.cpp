@@ -138,7 +138,7 @@ private Q_SLOTS:
     {
         ActionTrigger t(ActionTrigger::Timing::OnLift, 80);
         t.begin();
-        QVERIFY(!t.update(500)); // never mid-swipe
+        QCOMPARE(t.update(500), ActionTrigger::Fire::None); // never mid-swipe
         QVERIFY(t.end());
     }
 
@@ -146,9 +146,9 @@ private Q_SLOTS:
     {
         ActionTrigger t(ActionTrigger::Timing::MidSwipe, 80);
         t.begin();
-        QVERIFY(!t.update(40));
-        QVERIFY(t.update(85)); // fires once the distance is reached...
-        QVERIFY(!t.update(200)); // ...only once...
+        QCOMPARE(t.update(40), ActionTrigger::Fire::None);
+        QCOMPARE(t.update(85), ActionTrigger::Fire::Forward); // fires once the distance is reached...
+        QCOMPARE(t.update(200), ActionTrigger::Fire::None); // ...only once...
         QVERIFY(!t.end()); // ...and not again on lift
     }
 
@@ -158,7 +158,7 @@ private Q_SLOTS:
         // flick can't trigger an action by accident.
         ActionTrigger t(ActionTrigger::Timing::MidSwipe, 80);
         t.begin();
-        QVERIFY(!t.update(50));
+        QCOMPARE(t.update(50), ActionTrigger::Fire::None);
         QVERIFY(!t.end());
     }
 
@@ -166,9 +166,62 @@ private Q_SLOTS:
     {
         ActionTrigger t(ActionTrigger::Timing::MidSwipe, 80);
         t.begin();
-        QVERIFY(t.update(100));
+        QCOMPARE(t.update(100), ActionTrigger::Fire::Forward);
         t.begin();
-        QVERIFY(t.update(100));
+        QCOMPARE(t.update(100), ActionTrigger::Fire::Forward);
+    }
+
+    void triggerNoReverseWithoutOption()
+    {
+        // Swiping back without "swipe back to undo" does nothing more.
+        ActionTrigger t(ActionTrigger::Timing::MidSwipe, 80);
+        t.begin();
+        QCOMPARE(t.update(100), ActionTrigger::Fire::Forward);
+        QCOMPARE(t.update(-200), ActionTrigger::Fire::None);
+    }
+
+    void triggerReverseUndo()
+    {
+        ActionTrigger t(ActionTrigger::Timing::MidSwipe, 80, true);
+        t.begin();
+        QCOMPARE(t.update(90), ActionTrigger::Fire::Forward);
+        QCOMPARE(t.update(150), ActionTrigger::Fire::None); // keeps going: still one action
+        // Coming back is measured from the furthest point (150), not where it fired.
+        QCOMPARE(t.update(100), ActionTrigger::Fire::None);
+        QCOMPARE(t.update(69), ActionTrigger::Fire::Reverse); // 150 - 81
+        QCOMPARE(t.update(0), ActionTrigger::Fire::None);
+        // ...and forward again from the lowest point (0).
+        QCOMPARE(t.update(79), ActionTrigger::Fire::None);
+        QCOMPARE(t.update(80), ActionTrigger::Fire::Forward);
+        QVERIFY(!t.end());
+    }
+
+    void triggerReverseNeedsFullDistance()
+    {
+        // A small wobble after firing must not undo it.
+        ActionTrigger t(ActionTrigger::Timing::MidSwipe, 80, true);
+        t.begin();
+        QCOMPARE(t.update(100), ActionTrigger::Fire::Forward);
+        QCOMPARE(t.update(60), ActionTrigger::Fire::None);
+        QCOMPARE(t.update(100), ActionTrigger::Fire::None);
+    }
+
+    void triggerReverseIgnoredOnLift()
+    {
+        // The option only exists for mid-swipe timing.
+        ActionTrigger t(ActionTrigger::Timing::OnLift, 80, true);
+        t.begin();
+        QCOMPARE(t.update(100), ActionTrigger::Fire::None);
+        QCOMPARE(t.update(-100), ActionTrigger::Fire::None);
+        QVERIFY(t.end());
+    }
+
+    void oppositeDirection()
+    {
+        QCOMPARE(opposite(Direction::Up), Direction::Down);
+        QCOMPARE(opposite(Direction::Left), Direction::Right);
+        QCOMPARE(opposite(Direction::In), Direction::Out);
+        QCOMPARE(opposite(Direction::None), Direction::None);
     }
 
     void pinch()

@@ -31,6 +31,7 @@ const QMap<QString, QString> s_tuningDefaults = {
     {QStringLiteral("SwitcherStepVertical"), QStringLiteral("60")},
     {QStringLiteral("TriggerTiming"), QStringLiteral("lift")},
     {QStringLiteral("TriggerDistance"), QStringLiteral("80")},
+    {QStringLiteral("ReverseUndo"), QStringLiteral("false")},
 };
 
 KConfigGroup kwinPlugins()

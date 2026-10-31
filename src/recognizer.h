@@ -16,6 +16,7 @@ enum class GestureType { Swipe, Pinch, Hold };
 enum class Direction { None, Up, Down, Left, Right, In, Out };
 
 QString directionName(Direction d);
+Direction opposite(Direction d);
 
 /**
  * Accumulates the deltas of one touchpad swipe and locks onto a direction
@@ -67,26 +68,40 @@ private:
 /**
  * Decides when a gesture's action runs: when the fingers lift (default), or
  * mid-swipe as soon as the fingers have travelled `distance` along the
- * locked direction. Either way it fires at most once per gesture.
+ * locked direction.
+ *
+ * With `reverseUndo` (mid-swipe only), moving back by `distance` from the
+ * furthest point without lifting asks for the opposite direction's action,
+ * which undoes the first one (e.g. close the Overview it just opened); moving
+ * forward again by `distance` from the turning point fires forward again.
+ * Without it, an action fires at most once per gesture.
  */
 class ActionTrigger
 {
 public:
     enum class Timing { OnLift, MidSwipe };
+    enum class Fire { None, Forward, Reverse };
 
-    explicit ActionTrigger(Timing timing = Timing::OnLift, qreal distance = 80.0);
+    explicit ActionTrigger(Timing timing = Timing::OnLift, qreal distance = 80.0, bool reverseUndo = false);
 
-    void configure(Timing timing, qreal distance);
+    void configure(Timing timing, qreal distance, bool reverseUndo = false);
     void begin();
-    // Returns true when the action should run now (MidSwipe only).
-    bool update(qreal progress);
+    // Progress is travel along the locked direction. Says which action, if
+    // any, should run now (MidSwipe only).
+    Fire update(qreal progress);
     // Returns true when the action should run on lift.
     bool end();
 
 private:
     Timing m_timing;
     qreal m_distance;
+    bool m_reverseUndo;
     bool m_fired = false;
+    // After a forward fire we wait for a reversal, and the other way round.
+    bool m_awaitingReverse = false;
+    // Furthest point reached since the last fire, in the direction we're
+    // waiting to move away from.
+    qreal m_extreme = 0;
 };
 
 /**

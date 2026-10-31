@@ -31,6 +31,27 @@ QString directionName(Direction d)
     return QStringLiteral("None");
 }
 
+Direction opposite(Direction d)
+{
+    switch (d) {
+    case Direction::Up:
+        return Direction::Down;
+    case Direction::Down:
+        return Direction::Up;
+    case Direction::Left:
+        return Direction::Right;
+    case Direction::Right:
+        return Direction::Left;
+    case Direction::In:
+        return Direction::Out;
+    case Direction::Out:
+        return Direction::In;
+    case Direction::None:
+        break;
+    }
+    return Direction::None;
+}
+
 SwipeRecognizer::SwipeRecognizer(qreal threshold)
     : m_threshold(threshold)
 {
@@ -110,30 +131,56 @@ int SwitcherStepper::update(qreal delta)
     return steps;
 }
 
-ActionTrigger::ActionTrigger(Timing timing, qreal distance)
+ActionTrigger::ActionTrigger(Timing timing, qreal distance, bool reverseUndo)
     : m_timing(timing)
     , m_distance(distance)
+    , m_reverseUndo(reverseUndo)
 {
 }
 
-void ActionTrigger::configure(Timing timing, qreal distance)
+void ActionTrigger::configure(Timing timing, qreal distance, bool reverseUndo)
 {
     m_timing = timing;
     m_distance = distance;
+    m_reverseUndo = reverseUndo;
 }
 
 void ActionTrigger::begin()
 {
     m_fired = false;
+    m_awaitingReverse = false;
+    m_extreme = 0;
 }
 
-bool ActionTrigger::update(qreal progress)
+ActionTrigger::Fire ActionTrigger::update(qreal progress)
 {
-    if (m_timing != Timing::MidSwipe || m_fired || progress < m_distance) {
-        return false;
+    if (m_timing != Timing::MidSwipe) {
+        return Fire::None;
+    }
+    if (m_awaitingReverse) {
+        if (!m_reverseUndo) {
+            return Fire::None;
+        }
+        m_extreme = qMax(m_extreme, progress);
+        if (progress > m_extreme - m_distance) {
+            return Fire::None;
+        }
+        m_awaitingReverse = false;
+        m_extreme = progress;
+        return Fire::Reverse;
+    }
+    // The first fire counts from where the swipe started; later ones from
+    // the point where the fingers turned around.
+    if (m_fired) {
+        m_extreme = qMin(m_extreme, progress);
+    }
+    if (progress < m_extreme + m_distance) {
+        return Fire::None;
     }
     m_fired = true;
-    return true;
+    m_awaitingReverse = true;
+    m_extreme = progress;
+    return Fire::Forward;
 }
 
 bool ActionTrigger::end()

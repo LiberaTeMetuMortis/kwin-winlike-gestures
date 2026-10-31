@@ -128,12 +128,18 @@ KCM.SimpleKCM {
             highText: i18nc("@label:slider long distance", "Long")
             enabled: kcm.pluginEnabled && (kcm.revision, kcm.value("TriggerTiming")) === "midswipe"
         }
+        QQC2.CheckBox {
+            text: i18nc("@option:check", "Swipe back to undo")
+            enabled: kcm.pluginEnabled && (kcm.revision, kcm.value("TriggerTiming")) === "midswipe"
+            checked: (kcm.revision, kcm.value("ReverseUndo")) === "true"
+            onToggled: kcm.setValue("ReverseUndo", checked ? "true" : "false")
+        }
         QQC2.Label {
             Layout.preferredWidth: Kirigami.Units.gridUnit * 16
             wrapMode: Text.Wrap
             font: Kirigami.Theme.smallFont
             enabled: kcm.pluginEnabled
-            text: i18nc("@info", "Mid-swipe runs the action while your fingers are still moving. The window switcher always follows your fingers.")
+            text: i18nc("@info", "Mid-swipe runs the action while your fingers are still moving. With Swipe back to undo, moving back the other way before lifting undoes it, e.g. closes the Overview you just opened. The window switcher always follows your fingers.")
         }
         TuningSlider {
             Kirigami.FormData.label: i18nc("@label:slider", "Swipe starts after:")
