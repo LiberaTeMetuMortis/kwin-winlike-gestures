@@ -173,7 +173,8 @@ kde-gestures/
 ├── CMakeLists.txt            build: core lib, plugin module, tests, safe plugin install,
 │                             build/installed-files.txt (paths for the scripts)
 ├── install.sh / uninstall.sh build+test+install / remove, run as your normal user
-├── packaging/                OBS spec file
+├── release.sh                ./release.sh X.Y.Z: changelog, tag, push (CI + OBS do the rest)
+├── packaging/                OBS spec, .changes (changelog) and _service
 ├── kwin_winlike_gestures.categories  debug-log switch for KDebugSettings
 ├── src/
 │   ├── main.cpp              WinLikeGesturesFactory: the KWin::PluginFactory entry point
@@ -525,45 +526,71 @@ distro packages that rebuild automatically.
 GPL-2.0-or-later (required: the plugin links against KWin, which is GPL). See `LICENSE`.
 Every source file carries SPDX headers.
 
-### GitHub
+### Releasing
 
-* `.github/workflows/build.yml` builds and tests against the newest KWin in an openSUSE
-  Tumbleweed container on every push and pull request, and **weekly**, so a Plasma update
-  that breaks KWin's internal API shows up as a failed run.
-* Releases are git tags `vX.Y.Z`. GitHub's tarball for a tag
-  (`archive/vX.Y.Z/kwin-winlike-gestures-X.Y.Z.tar.gz`) is what the RPM builds from.
+```sh
+./release.sh 0.2.0
+```
 
-To release:
+That's the whole release. The script:
 
-1. Bump `VERSION` in `CMakeLists.txt` and `Version:` in `packaging/kwin-winlike-gestures.spec`.
-2. Commit, then `git tag vX.Y.Z && git push --tags`.
-3. Update the OBS package (below).
+1. checks you're on an up-to-date, clean `main` and that `0.2.0` is newer than the last tag;
+2. builds and runs the tests;
+3. turns the commit messages since the last `v*` tag into a
+   `packaging/kwin-winlike-gestures.changes` entry and **shows it to you**: `y` to release,
+   `e` to edit it first, `n` to cancel (nothing is changed);
+4. commits it as "Release 0.2.0", tags `v0.2.0`, and pushes `main` and the tag together.
+
+Then, automatically:
+
+5. **GitHub Actions** (`.github/workflows/build.yml`) builds and tests the tag in an
+   openSUSE Tumbleweed container. If that passes, and the tag is the tip of `main`, it
+   triggers OBS.
+6. **OBS** checks out `main`, takes the version from the newest tag, extracts the spec and
+   `.changes` from the repo, builds for Tumbleweed and Slowroll, and publishes. Users get it
+   with `sudo zypper up`.
+
+The version exists **only in git tags**: there's no version number to bump anywhere.
+Because the changelog comes from commit messages, write them for users ("Add mid-swipe
+action timing", not "fix stuff"); `e` lets you tidy the entry before releasing.
+
+The same workflow also builds every push and pull request, and runs **weekly**, so a Plasma
+update that breaks KWin's internal API shows up as a failed run.
 
 ### openSUSE Build Service (OBS)
 
 `packaging/kwin-winlike-gestures.spec` builds the plugin, runs the tests in `%check`, and
-pins the package to the KWin it was built against (`%requires_eq kwin6` →
-`Requires: kwin6 = 6.8.1`). OBS rebuilds it whenever Tumbleweed's `kwin6` changes, so
-users always get a matching build through `zypper`.
+pins the package to the KWin it was built against (`%requires_eq libkwin6` →
+`Requires: libkwin6 = 6.8.1`). OBS rebuilds it automatically whenever Tumbleweed's KWin
+changes, without a new release, so users always get a matching build through `zypper`.
 
-One-time setup (needs an account on build.opensuse.org and `sudo zypper in osc`):
+The OBS package
+([home:MetuMortis/kwin-winlike-gestures](https://build.opensuse.org/package/show/home:MetuMortis/kwin-winlike-gestures))
+contains only `packaging/_service`. Everything else comes from git:
 
-```sh
-osc checkout home:<you>                       # your home project
-cd home:<you>
-osc mkpac kwin-winlike-gestures && cd kwin-winlike-gestures
-cp ~/kde-gestures/packaging/kwin-winlike-gestures.spec ~/kde-gestures/packaging/_service .
-osc add kwin-winlike-gestures.spec _service   # _service fetches Source0 from GitHub
-osc commit -m "Initial package"
-```
+| `_service` step | What it does |
+|---|---|
+| `obs_scm` | Checks out `main` from GitHub, sets the version from the newest `v*` tag, extracts the spec and `.changes` |
+| `tar`, `recompress` | Turn the checkout into `kwin-winlike-gestures-<version>.tar.gz` (at build time) |
+| `set_version` | Writes the version into the spec's `Version:` (at build time) |
 
-Then in the web UI add the **openSUSE Tumbleweed** repository to the project. For each
-release, update `Version:` in the spec, `osc commit`, and OBS fetches the new tarball and
-rebuilds.
+It's built for Tumbleweed and Slowroll on x86_64 only (the package's build settings
+disable the project's other repositories, which don't have Plasma 6).
 
-Users install with (the published package lives at
-[home:MetuMortis/kwin-winlike-gestures](https://build.opensuse.org/package/show/home:MetuMortis/kwin-winlike-gestures),
-built for Tumbleweed and Slowroll, x86_64):
+**One-time setup for the GitHub → OBS trigger:**
+
+1. Create a token that may only re-run this package's services:
+   ```sh
+   osc token --create home:MetuMortis kwin-winlike-gestures
+   ```
+   It prints a `<string>`; that's the token.
+2. On GitHub: **Settings → Secrets and variables → Actions → New repository secret**,
+   name `OBS_TOKEN`, value the token.
+
+To change `_service` itself (rare): edit `packaging/_service`, copy it into an OBS
+checkout (`osc checkout home:MetuMortis kwin-winlike-gestures`) and `osc commit`.
+
+Users install with:
 
 ```sh
 sudo zypper addrepo https://download.opensuse.org/repositories/home:MetuMortis/openSUSE_Tumbleweed/home:MetuMortis.repo
@@ -572,12 +599,13 @@ sudo zypper in kwin-winlike-gestures
 
 (Slowroll: replace `openSUSE_Tumbleweed` with `openSUSE_Slowroll` in both places.)
 
-To test the spec locally before uploading:
+To test the spec locally (the spec's `Version: 0` is normally set by OBS):
 
 ```sh
-mkdir -p /tmp/rpm/SOURCES
-git archive --prefix=kwin-winlike-gestures-0.1.0/ -o /tmp/rpm/SOURCES/kwin-winlike-gestures-0.1.0.tar.gz HEAD
-rpmbuild -bb --define "_topdir /tmp/rpm" packaging/kwin-winlike-gestures.spec
+v=0.1.0; mkdir -p /tmp/rpm/SOURCES
+git archive --prefix=kwin-winlike-gestures-$v/ -o /tmp/rpm/SOURCES/kwin-winlike-gestures-$v.tar.gz HEAD
+sed "s/^Version:.*/Version: $v/" packaging/kwin-winlike-gestures.spec > /tmp/rpm/test.spec
+rpmbuild -bb --define "_topdir /tmp/rpm" /tmp/rpm/test.spec
 ```
 
 ### Other distros
