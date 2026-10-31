@@ -91,12 +91,16 @@ public:
     Fire update(qreal progress);
     // Returns true when the action should run on lift.
     bool end();
+    // No more fires until the next begin(), e.g. when a swipe back had
+    // nothing to run: firing forward again would repeat the first action.
+    void stop();
 
 private:
     Timing m_timing;
     qreal m_distance;
     bool m_reverseUndo;
     bool m_fired = false;
+    bool m_stopped = false;
     // After a forward fire we wait for a reversal, and the other way round.
     bool m_awaitingReverse = false;
     // Furthest point reached since the last fire, in the direction we're

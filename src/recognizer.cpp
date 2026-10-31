@@ -148,13 +148,14 @@ void ActionTrigger::configure(Timing timing, qreal distance, bool reverseUndo)
 void ActionTrigger::begin()
 {
     m_fired = false;
+    m_stopped = false;
     m_awaitingReverse = false;
     m_extreme = 0;
 }
 
 ActionTrigger::Fire ActionTrigger::update(qreal progress)
 {
-    if (m_timing != Timing::MidSwipe) {
+    if (m_timing != Timing::MidSwipe || m_stopped) {
         return Fire::None;
     }
     if (m_awaitingReverse) {
@@ -187,7 +188,12 @@ bool ActionTrigger::end()
 {
     // Mid-swipe mode only acts once the distance is reached; a short swipe
     // that never got there does nothing.
-    return m_timing == Timing::OnLift;
+    return m_timing == Timing::OnLift && !m_stopped;
+}
+
+void ActionTrigger::stop()
+{
+    m_stopped = true;
 }
 
 SwitcherNavigator::SwitcherNavigator(qreal horizontalStep, qreal verticalStep)

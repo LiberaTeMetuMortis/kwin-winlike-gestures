@@ -40,6 +40,9 @@ struct Action {
     static Action parse(const QString &spec);
     QString toString() const;
     bool handled() const { return kind != Kind::Passthrough; }
+    // Whether running this can undo a swipe (swipe back to undo): only
+    // actions that do something. The switcher, block and passthrough can't.
+    bool canUndo() const { return kind == Kind::Shortcut || kind == Kind::Command; }
     bool operator==(const Action &) const = default;
 };
 

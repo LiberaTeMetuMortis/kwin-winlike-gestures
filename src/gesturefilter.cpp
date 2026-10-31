@@ -167,8 +167,20 @@ bool GestureFilter::swipeGestureUpdate(KWin::PointerSwipeGestureUpdateEvent *eve
                 m_states = currentStates();
             }
             m_swipeFired = true;
-            const Direction direction = fire == ActionTrigger::Fire::Reverse ? opposite(m_swipe.direction()) : m_swipe.direction();
-            finish(GestureType::Swipe, m_swipeMode, m_swipe.fingers(), direction);
+            if (fire == ActionTrigger::Fire::Reverse) {
+                // Undo runs the opposite direction's binding. If that doesn't
+                // run anything (switcher, block), stop here instead of letting
+                // a later forward fire repeat the first action.
+                const Direction back = opposite(m_swipe.direction());
+                if (!m_config->action(GestureType::Swipe, m_swipe.fingers(), back, m_states).canUndo()) {
+                    qCDebug(WINLIKE) << "swipe back: nothing to undo with, stopping";
+                    m_swipeTrigger.stop();
+                } else {
+                    finish(GestureType::Swipe, m_swipeMode, m_swipe.fingers(), back);
+                }
+            } else {
+                finish(GestureType::Swipe, m_swipeMode, m_swipe.fingers(), m_swipe.direction());
+            }
         }
     }
     return true;

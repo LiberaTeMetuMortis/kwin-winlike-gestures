@@ -198,6 +198,16 @@ private Q_SLOTS:
         QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left, State::DesktopShown).name, QStringLiteral("b"));
     }
 
+    void canUndo()
+    {
+        // Only actions that run something can undo a swipe.
+        QVERIFY(Action::parse(QStringLiteral("shortcut:kwin/Overview")).canUndo());
+        QVERIFY(Action::parse(QStringLiteral("command:foo")).canUndo());
+        QVERIFY(!Action::parse(QStringLiteral("switcher")).canUndo());
+        QVERIFY(!Action::parse(QStringLiteral("block")).canUndo());
+        QVERIFY(!Action::parse(QStringLiteral("passthrough")).canUndo());
+    }
+
     void badThresholdIgnored()
     {
         GestureConfig c;

@@ -206,6 +206,23 @@ private Q_SLOTS:
         QCOMPARE(t.update(100), ActionTrigger::Fire::None);
     }
 
+    void triggerStop()
+    {
+        // When a swipe back has nothing to run, the gesture stops there:
+        // moving forward again must not re-run (toggle) the first action.
+        ActionTrigger t(ActionTrigger::Timing::MidSwipe, 80, true);
+        t.begin();
+        QCOMPARE(t.update(100), ActionTrigger::Fire::Forward);
+        QCOMPARE(t.update(0), ActionTrigger::Fire::Reverse);
+        t.stop();
+        QCOMPARE(t.update(200), ActionTrigger::Fire::None);
+        QCOMPARE(t.update(-200), ActionTrigger::Fire::None);
+        QVERIFY(!t.end());
+        // A new gesture starts fresh.
+        t.begin();
+        QCOMPARE(t.update(100), ActionTrigger::Fire::Forward);
+    }
+
     void triggerReverseIgnoredOnLift()
     {
         // The option only exists for mid-swipe timing.
