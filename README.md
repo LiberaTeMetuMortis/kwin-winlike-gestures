@@ -18,6 +18,26 @@ Built and tested against **KWin / Plasma 6.8.1** on openSUSE Tumbleweed.
 
 ---
 
+## Default gestures
+
+| Gesture | Action |
+|---|---|
+| 3-finger swipe up | Overview (like Windows Task View). **If the desktop is shown:** bring the windows back |
+| 3-finger swipe down | Show Desktop. **If Overview is open:** close Overview |
+| 3-finger swipe left / right | **Alt+Tab switcher.** Opens and stays open while your fingers are down; keep sliding left/right/up/down to move the selection (like the arrow keys); lift to switch. A quick flick jumps to the previous window. |
+| 4-finger swipe up | Same as 3-finger up (including the desktop-shown rule) |
+| 4-finger swipe down | Same as 3-finger down (including the Overview rule) |
+| 4-finger swipe left / right | Next / previous virtual desktop (content follows your fingers) |
+| 2-finger scroll, pinch-zoom, 2-finger tap | Untouched: handled by libinput and apps, already like Windows |
+
+Every binding can be changed in **System Settings → Mouse & Touchpad → Touchpad
+Gestures** (see [Settings page](#settings-page)) or in the config file (see
+[Configuration](#configuration)).
+
+---
+<img width="926" height="1396" alt="image" src="https://github.com/user-attachments/assets/7556de5a-d93c-4a41-914d-859f899a05de" />
+
+
 ## Install
 
 ### openSUSE Tumbleweed and Slowroll (recommended)
@@ -61,25 +81,7 @@ There are no packages for these yet. Build it from source:
 `./install.sh` again: the plugin has to match your exact KWin version.
 
 ---
-
-## Default gestures
-
-| Gesture | Action |
-|---|---|
-| 3-finger swipe up | Overview (like Windows Task View). **If the desktop is shown:** bring the windows back |
-| 3-finger swipe down | Show Desktop. **If Overview is open:** close Overview |
-| 3-finger swipe left / right | **Alt+Tab switcher.** Opens and stays open while your fingers are down; keep sliding left/right/up/down to move the selection (like the arrow keys); lift to switch. A quick flick jumps to the previous window. |
-| 4-finger swipe up | Same as 3-finger up (including the desktop-shown rule) |
-| 4-finger swipe down | Same as 3-finger down (including the Overview rule) |
-| 4-finger swipe left / right | Next / previous virtual desktop (content follows your fingers) |
-| 2-finger scroll, pinch-zoom, 2-finger tap | Untouched: handled by libinput and apps, already like Windows |
-
-Every binding can be changed in **System Settings → Mouse & Touchpad → Touchpad
-Gestures** (see [Settings page](#settings-page)) or in the config file (see
-[Configuration](#configuration)).
-
----
-
+`
 ## How it works
 
 ### Why a KWin plugin
