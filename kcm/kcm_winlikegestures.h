@@ -60,4 +60,6 @@ private:
     bool m_pluginEnabled = false;
     bool m_savedPluginEnabled = false;
     int m_revision = 0;
+    mutable QStringList m_kwinShortcuts;
+    mutable bool m_kwinShortcutsLoaded = false;
 };

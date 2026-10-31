@@ -102,15 +102,21 @@ void KCMWinLikeGestures::setPluginEnabled(bool enabled)
 
 QStringList KCMWinLikeGestures::kwinShortcuts() const
 {
-    // Runs in System Settings, not inside KWin, so a blocking call is fine here.
+    // Fetched once, on first use: the call goes into KWin (kglobalaccel lives
+    // there) and blocks until KWin answers, so asking once per row made the
+    // page slow to open. Blocking is fine here since we're not inside KWin.
+    if (m_kwinShortcutsLoaded) {
+        return m_kwinShortcuts;
+    }
+    m_kwinShortcutsLoaded = true;
     const QDBusMessage message = QDBusMessage::createMethodCall(QStringLiteral("org.kde.kglobalaccel"),
                                                                 QStringLiteral("/component/kwin"),
                                                                 QStringLiteral("org.kde.kglobalaccel.Component"),
                                                                 QStringLiteral("shortcutNames"));
     const QDBusReply<QStringList> reply = QDBusConnection::sessionBus().call(message);
-    QStringList names = reply.isValid() ? reply.value() : QStringList();
-    names.sort(Qt::CaseInsensitive);
-    return names;
+    m_kwinShortcuts = reply.isValid() ? reply.value() : QStringList();
+    m_kwinShortcuts.sort(Qt::CaseInsensitive);
+    return m_kwinShortcuts;
 }
 
 void KCMWinLikeGestures::load()

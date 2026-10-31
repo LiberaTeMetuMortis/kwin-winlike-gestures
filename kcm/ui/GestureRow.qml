@@ -79,7 +79,9 @@ RowLayout {
         onActivated: index => {
             const choice = row.choices[index];
             if (choice.custom === "shortcut") {
-                kcm.setValue(row.key, "shortcut:kwin/" + (kcm.kwinShortcuts[0] ?? "Overview"));
+                // Start on a shortcut that isn't a preset, so the picker shows.
+                const name = kcm.kwinShortcuts.find(n => !row.presets.some(c => c.spec === "shortcut:kwin/" + n)) ?? "Overview";
+                kcm.setValue(row.key, "shortcut:kwin/" + name);
             } else if (choice.custom === "command") {
                 kcm.setValue(row.key, "command:");
             } else {
@@ -91,7 +93,8 @@ RowLayout {
     QQC2.ComboBox {
         visible: row.customKind === "shortcut"
         Layout.preferredWidth: Kirigami.Units.gridUnit * 16
-        model: kcm.kwinShortcuts
+        // Only rows showing the picker need the list (it's fetched from KWin).
+        model: visible ? kcm.kwinShortcuts : []
         currentIndex: visible ? model.indexOf(row.spec.slice("shortcut:kwin/".length)) : -1
         onActivated: index => kcm.setValue(row.key, "shortcut:kwin/" + model[index])
     }
