@@ -91,42 +91,24 @@ KCM.SimpleKCM {
 
         Kirigami.Separator {
             Kirigami.FormData.isSection: true
-            Kirigami.FormData.label: i18nc("@title:group", "While Overview is open")
+            Kirigami.FormData.label: i18nc("@title:group", "Conditional gestures")
         }
-        GestureRow {
-            key: "Swipe3Up.Overview"
-            Kirigami.FormData.label: i18nc("@label", "Three fingers up:")
-            helpText: i18nc("@info:tooltip", "These replace the normal gestures while Overview is open. Rows you haven't changed follow the normal gesture above. Overview opens and closes with the same action, so in this section it shows as \"Close Overview\".")
+        RowLayout {
+            Kirigami.FormData.label: i18nc("@label", "Special situations:")
+            QQC2.Label {
+                readonly property int count: (kcm.revision, kcm.ruleCount())
+                text: count > 0 ? i18ncp("@info", "%1 rule", "%1 rules", count) : i18nc("@info no conditional rules", "None")
+                enabled: kcm.pluginEnabled
+            }
+            QQC2.Button {
+                text: i18nc("@action:button", "Edit…")
+                icon.name: "document-edit"
+                onClicked: kcm.push("ConditionalGestures.qml")
+            }
+            Kirigami.ContextualHelpButton {
+                toolTipText: i18nc("@info:tooltip", "Make gestures do something else while Overview or the desktop grid is open, or while the desktop is shown. A gesture without a rule there keeps its normal action.")
+            }
         }
-        GestureRow { key: "Swipe3Down.Overview"; Kirigami.FormData.label: i18nc("@label", "Three fingers down:") }
-        GestureRow { key: "Swipe4Up.Overview"; Kirigami.FormData.label: i18nc("@label", "Four fingers up:") }
-        GestureRow { key: "Swipe4Down.Overview"; Kirigami.FormData.label: i18nc("@label", "Four fingers down:") }
-
-        Kirigami.Separator {
-            Kirigami.FormData.isSection: true
-            Kirigami.FormData.label: i18nc("@title:group", "While the desktop grid is open")
-        }
-        GestureRow {
-            key: "Swipe3Up.Grid"
-            Kirigami.FormData.label: i18nc("@label", "Three fingers up:")
-            helpText: i18nc("@info:tooltip", "These replace the normal gestures while the desktop grid is open. Rows you haven't changed follow the normal gesture above, not the Overview section. The desktop grid opens and closes with the same action, so in this section it shows as \"Close desktop grid\".")
-        }
-        GestureRow { key: "Swipe3Down.Grid"; Kirigami.FormData.label: i18nc("@label", "Three fingers down:") }
-        GestureRow { key: "Swipe4Up.Grid"; Kirigami.FormData.label: i18nc("@label", "Four fingers up:") }
-        GestureRow { key: "Swipe4Down.Grid"; Kirigami.FormData.label: i18nc("@label", "Four fingers down:") }
-
-        Kirigami.Separator {
-            Kirigami.FormData.isSection: true
-            Kirigami.FormData.label: i18nc("@title:group", "While the desktop is shown")
-        }
-        GestureRow {
-            key: "Swipe3Up.Desktop"
-            Kirigami.FormData.label: i18nc("@label", "Three fingers up:")
-            helpText: i18nc("@info:tooltip", "These replace the normal gestures while the desktop is shown (after Show desktop). Rows you haven't changed follow the normal gesture above. Show desktop switches on and off with the same action, so in this section it shows as \"Bring windows back\", which restores the windows exactly as they were.")
-        }
-        GestureRow { key: "Swipe3Down.Desktop"; Kirigami.FormData.label: i18nc("@label", "Three fingers down:") }
-        GestureRow { key: "Swipe4Up.Desktop"; Kirigami.FormData.label: i18nc("@label", "Four fingers up:") }
-        GestureRow { key: "Swipe4Down.Desktop"; Kirigami.FormData.label: i18nc("@label", "Four fingers down:") }
 
         Kirigami.Separator {
             Kirigami.FormData.isSection: true
