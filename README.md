@@ -255,8 +255,9 @@ runs the **opposite direction's** binding with the desktop state as it is *now*.
 3 fingers up opened Overview, swiping back down runs "3 fingers down while Overview is
 open" (close Overview); after 4 fingers right (next desktop), swiping back left runs
 "previous desktop". Moving forward again re-runs the original, so you can go back and
-forth before lifting. Swiping back only works when the opposite direction runs a
-shortcut or command; if it's the window switcher, *Do nothing* or *Leave to Plasma*,
+forth before lifting. Swiping back only works when both the action that ran and the
+opposite direction's are a shortcut or command. A pressed key can't be taken back, and
+the window switcher, *Do nothing* and *Leave to Plasma* run nothing to undo with: then
 swiping back does nothing and the gesture stops there. The plugin can't tell whether an
 action had an effect: on the last desktop (without wrap-around), "next desktop" does
 nothing, but swiping back still runs "previous desktop". Swipes only; pinches fire once. A cancelled gesture does nothing. The window switcher follows the fingers live
