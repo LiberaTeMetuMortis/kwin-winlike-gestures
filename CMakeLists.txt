@@ -19,6 +19,9 @@ include(KDECompilerSettings NO_POLICY_SCOPE)
 
 find_package(Qt6 6.6 REQUIRED COMPONENTS Core Gui DBus Widgets Quick Test)
 find_package(KWin REQUIRED)
+# KWin's xkb.h includes xkbcommon, which openSUSE keeps outside /usr/include.
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(XKBCommon REQUIRED IMPORTED_TARGET xkbcommon)
 
 # Pure logic, no KWin dependency: unit-testable.
 add_library(winlike_core STATIC src/recognizer.cpp src/gestureconfig.cpp)
@@ -32,7 +35,7 @@ add_library(winlikegestures MODULE
     src/gesturefilter.cpp
     src/actionrunner.cpp
 )
-target_link_libraries(winlikegestures PRIVATE winlike_core KWin::kwin KF6::ConfigCore Qt6::DBus)
+target_link_libraries(winlikegestures PRIVATE winlike_core KWin::kwin KF6::ConfigCore Qt6::DBus PkgConfig::XKBCommon)
 
 # KWin keeps the plugin it loaded mapped in memory, so the installed file must
 # never be overwritten in place (that can crash KWin). When the build differs,

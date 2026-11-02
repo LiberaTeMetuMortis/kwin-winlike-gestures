@@ -35,6 +35,7 @@ BuildRequires:  pkgconfig(epoxy)
 BuildRequires:  pkgconfig(libdrm)
 BuildRequires:  pkgconfig(vulkan)
 BuildRequires:  pkgconfig(wayland-server)
+BuildRequires:  pkgconfig(xkbcommon)
 # Binary KWin plugins only load into the exact KWin version they were built
 # against; OBS rebuilds this package whenever kwin6 changes. Pin the library
 # the plugin links (always in the build root via kwin6-devel); kwin6 itself

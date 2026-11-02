@@ -224,12 +224,20 @@ private Q_SLOTS:
     void gridDefaults()
     {
         GestureConfig c;
-        // Grid open: swipe down closes it (the Grid View shortcut toggles).
-        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Down, State::GridOpen).name, QStringLiteral("Grid View"));
-        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Down, State::GridOpen).name, QStringLiteral("Grid View"));
-        // No .Grid rule: the normal key (up opens Overview from the grid).
-        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Up, State::GridOpen).name, QStringLiteral("Overview"));
-        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left, State::GridOpen).kind, Action::Kind::Switcher);
+        const auto grid = [&](int f, Direction d) {
+            return c.action(GestureType::Swipe, f, d, State::GridOpen);
+        };
+        // 3 left/right move the grid's highlight, 3 down opens it, 4 down closes the grid.
+        QCOMPARE(grid(3, Direction::Left).kind, Action::Kind::Key);
+        QCOMPARE(grid(3, Direction::Left).name, QStringLiteral("Left"));
+        QCOMPARE(grid(3, Direction::Right).name, QStringLiteral("Right"));
+        QCOMPARE(grid(3, Direction::Down).name, QStringLiteral("Return"));
+        QCOMPARE(grid(4, Direction::Down).name, QStringLiteral("Grid View"));
+        // No .Grid rule: the normal key.
+        QCOMPARE(grid(3, Direction::Up).name, QStringLiteral("Overview"));
+        // All four 3-finger directions are ours in the grid, so the switcher never opens there.
+        QVERIFY(c.handlesAllDirections(GestureType::Swipe, 3, State::GridOpen));
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left).kind, Action::Kind::Switcher);
         // .Grid rules don't leak into the other states.
         QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Down, State::OverviewOpen).name, QStringLiteral("Overview"));
         QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Down).name, QStringLiteral("Show Desktop"));
@@ -241,14 +249,15 @@ private Q_SLOTS:
         // rules apply, else the normal key, never .Overview or .Desktop.
         GestureConfig c;
         c.load({
-            {QStringLiteral("Swipe3Left.Overview"), QStringLiteral("command:a")},
-            {QStringLiteral("Swipe3Left.Desktop"), QStringLiteral("command:b")},
-            {QStringLiteral("Swipe3Right.Grid"), QStringLiteral("command:c")},
+            {QStringLiteral("Swipe3Up.Overview"), QStringLiteral("command:a")},
+            {QStringLiteral("Swipe3Up.Desktop"), QStringLiteral("command:b")},
+            {QStringLiteral("Swipe4Left.Grid"), QStringLiteral("command:c")},
         });
         const States all = State::GridOpen | State::OverviewOpen | State::DesktopShown;
-        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left, all).kind, Action::Kind::Switcher);
-        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Right, all).name, QStringLiteral("c"));
-        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Right, State::OverviewOpen).kind, Action::Kind::Switcher);
+        // 3 up has no .Grid rule: the normal key, not .Overview or .Desktop.
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Up, all).name, QStringLiteral("Overview"));
+        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Left, all).name, QStringLiteral("c"));
+        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Left, State::OverviewOpen).kind, Action::Kind::Plasma);
     }
 
     void gridOverridesAndInherit()

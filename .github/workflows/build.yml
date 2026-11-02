@@ -29,7 +29,7 @@ jobs:
             qt6-base-private-devel qt6-declarative-devel qt6-dbus-devel qt6-test-devel \
             kf6-kconfig-devel kf6-kcoreaddons-devel kf6-kwindowsystem-devel \
             kf6-kcmutils-devel kf6-ki18n-devel \
-            'pkgconfig(epoxy)' 'pkgconfig(libdrm)' 'pkgconfig(vulkan)' 'pkgconfig(wayland-server)'
+            'pkgconfig(epoxy)' 'pkgconfig(libdrm)' 'pkgconfig(vulkan)' 'pkgconfig(wayland-server)' 'pkgconfig(xkbcommon)'
 
       - uses: actions/checkout@v4
 

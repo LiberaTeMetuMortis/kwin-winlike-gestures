@@ -133,7 +133,11 @@ QMap<QString, QString> GestureConfig::defaults()
         // Up and down undo each other, like on Windows. Both shortcuts toggle.
         {QStringLiteral("Swipe3Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},
         {QStringLiteral("Swipe4Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},
-        {QStringLiteral("Swipe3Down.Grid"), QStringLiteral("shortcut:kwin/Grid View")},
+        // In the desktop grid, 3 fingers act like its arrow keys and Enter:
+        // move the highlight between windows, then open the highlighted one.
+        {QStringLiteral("Swipe3Left.Grid"), QStringLiteral("key:Left")},
+        {QStringLiteral("Swipe3Right.Grid"), QStringLiteral("key:Right")},
+        {QStringLiteral("Swipe3Down.Grid"), QStringLiteral("key:Return")},
         {QStringLiteral("Swipe4Down.Grid"), QStringLiteral("shortcut:kwin/Grid View")},
         {QStringLiteral("Swipe3Up.Desktop"), QStringLiteral("shortcut:kwin/Show Desktop")},
         {QStringLiteral("Swipe4Up.Desktop"), QStringLiteral("shortcut:kwin/Show Desktop")},

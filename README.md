@@ -23,10 +23,10 @@ Built and tested against **KWin / Plasma 6.8.1** on openSUSE Tumbleweed.
 | Gesture | Action |
 |---|---|
 | 3-finger swipe up | Overview (like Windows Task View). **If the desktop is shown:** bring the windows back |
-| 3-finger swipe down | Show Desktop. **If Overview is open:** close Overview. **If the desktop grid is open:** close the grid |
-| 3-finger swipe left / right | **Alt+Tab switcher.** Opens and stays open while your fingers are down; keep sliding left/right/up/down to move the selection (like the arrow keys); lift to switch. A quick flick jumps to the previous window. |
+| 3-finger swipe down | Show Desktop. **If Overview is open:** close Overview. **If the desktop grid is open:** open the highlighted window |
+| 3-finger swipe left / right | **Alt+Tab switcher.** Opens and stays open while your fingers are down; keep sliding left/right/up/down to move the selection (like the arrow keys); lift to switch. A quick flick jumps to the previous window. **If the desktop grid is open:** move the grid's highlight one window left/right instead (it presses the arrow key) |
 | 4-finger swipe up | Same as 3-finger up (including the desktop-shown rule) |
-| 4-finger swipe down | Same as 3-finger down (including the Overview and grid rules) |
+| 4-finger swipe down | Same as 3-finger down (including the Overview rule). **If the desktop grid is open:** close the grid |
 | 4-finger swipe left / right | **Slide between virtual desktops**, using Plasma's own animation, which follows your fingers. The desktop moves with them, so swiping left brings in the desktop on the right. Swipe back before lifting to stay where you are. |
 | 2-finger scroll, pinch-zoom, 2-finger tap | Untouched: handled by libinput and apps, already like Windows |
 
@@ -583,7 +583,8 @@ Pinch3In=command:dolphin
 #   .Overview  Overview is open      .Desktop  Show Desktop is active
 #   .Grid      the desktop grid is open
 Swipe3Down.Overview=shortcut:kwin/Overview      # close Overview (the shortcut toggles)
-Swipe3Down.Grid=shortcut:kwin/Grid View         # close the desktop grid
+Swipe3Left.Grid=key:Left                        # move the grid's highlight
+Swipe4Down.Grid=shortcut:kwin/Grid View         # close the desktop grid
 Swipe3Up.Desktop=shortcut:kwin/Show Desktop     # bring the windows back
 
 # Tuning
@@ -600,6 +601,7 @@ ReverseUndo=false           # midswipe only: swipe back the other way to undo
 |---|---|
 | `shortcut:<component>/<name>` | Trigger a KDE global shortcut |
 | `command:<shell command>` | Run a command |
+| `key:<keys>` | Press and release a key combination, as if typed: `key:Left`, `key:Return`, `key:Ctrl+Shift+T` (Qt's key names) |
 | `switcher` | Live Alt+Tab switcher (meant for horizontal swipes) |
 | `plasma:<3\|4><Up\|Down\|Left\|Right>` | Swipes only: hand the swipe to that KWin gesture, which follows the fingers (see [Handing a swipe to Plasma's own gestures](#handing-a-swipe-to-plasmas-own-gestures)) |
 | `block` | Swallow the gesture and do nothing |
