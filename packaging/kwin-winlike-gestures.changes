@@ -1,4 +1,31 @@
 -------------------------------------------------------------------
+Mon Nov 02 14:46:30 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
+
+- Update to version 1.0.0:
+  * CI: zypper dup before installing build deps
+  * Desktop grid state and conditional gestures design
+  * Press key action in config
+  * Press key runs in KWin; built-in grid rules
+  * Core helpers for conditional rules
+  * KCM: rule list API
+  * Settings: Press key action with key recorder
+  * Settings: conditional gestures page with a card per situation
+  * README: conditional gestures
+  * Swipe back never undoes or repeats a keystroke; warn if grid detection breaks
+  * README: swipe back stops after Press key
+  * Press key: send the right keycode, and AltGr for third-level symbols
+  * Settings: keep a card when its last rule is deleted; re-added built-in rules come back as they were
+  * Settings: distinct icon for the desktop grid; README screenshots of the new pages
+  * Desktop grid: 3-finger left/right slide with arrow keys, up and down included
+  * README: screenshot with the grid's arrow-key sliding
+  * Settings: cards keep their rows inside when rules change
+  * Settings: conditional gestures below pinch
+  * Settings: Special situations and Run actions line up with the gesture dropdowns
+  * Settings: one Edit Conditional Gestures button instead of the rule count
+  * Settings: Sensitivity becomes Other settings, with the Edit Conditional Gestures button
+  * README: settings page screenshot in System Settings
+
+-------------------------------------------------------------------
 Sat Oct 31 23:15:07 UTC 2026 - LiberaTeMetuMortis <78408599+LiberaTeMetuMortis@users.noreply.github.com>
 
 - Update to version 0.2.0:
