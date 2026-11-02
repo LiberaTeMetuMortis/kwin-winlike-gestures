@@ -173,7 +173,14 @@ KCM.SimpleKCM {
                                 QQC2.ToolTip.text: text
                                 QQC2.ToolTip.visible: hovered
                                 QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
-                                onClicked: kcm.removeRule(modelData)
+                                onClicked: {
+                                    // Keep the card when its last rule goes, so another
+                                    // gesture can be added without Add New again.
+                                    if (card.rules.length === 1 && !page.openedEmpty.includes(card.suffix)) {
+                                        page.openedEmpty = page.openedEmpty.concat([card.suffix]);
+                                    }
+                                    kcm.removeRule(modelData);
+                                }
                             }
                         }
                     }

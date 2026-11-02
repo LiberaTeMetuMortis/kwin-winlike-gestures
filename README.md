@@ -552,7 +552,8 @@ kcm_winlikegestures`). It has:
   that situation; any gesture without a rule there keeps its normal action. **Add New**
   adds a situation, **Add Gesture…** adds a rule (it starts as *Do nothing*), the trash
   buttons remove a rule or the whole situation. The built-in rules show up as ordinary
-  rules and can be changed or deleted. In a situation, a toggle shows as what it does
+  rules and can be changed or deleted; adding a deleted one back restores its built-in
+  action. In a situation, a toggle shows as what it does
   there: *Close Overview*, *Close desktop grid*, *Bring windows back*.
 * **Run actions:** *When fingers lift* (default) or *Mid-swipe, after a set distance*,
   with a slider for that distance, and **Swipe back to undo** (mid-swipe only).

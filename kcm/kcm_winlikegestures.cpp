@@ -94,8 +94,9 @@ int KCMWinLikeGestures::ruleCount() const
 
 void KCMWinLikeGestures::addRule(const QString &key)
 {
-    // Starts as "Do nothing", so it is visibly a rule and gets saved.
-    setValue(key, QStringLiteral("block"));
+    // A built-in rule comes back as it was; a new one starts as "Do nothing",
+    // so it is visibly a rule and gets saved.
+    setValue(key, m_defaults.value(key, QStringLiteral("block")));
 }
 
 void KCMWinLikeGestures::removeRule(const QString &key)
