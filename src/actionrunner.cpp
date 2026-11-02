@@ -4,6 +4,7 @@
 */
 
 #include "actionrunner.h"
+#include "keypress.h"
 #include "logging.h"
 
 #include <input.h>
@@ -73,32 +74,35 @@ void pressKey(const QString &text)
         return;
     }
 
-    QList<uint32_t> modifiers;
+    // The modifiers the layout needs to reach the key's level, by name.
+    QStringList levelModifiers;
+    xkb_keymap *keymap = xkb->keymap();
+    for (xkb_mod_index_t i = 0; keymap && i < xkb_keymap_num_mods(keymap); ++i) {
+        if (code->modifiers & (xkb_mod_mask_t(1) << i)) {
+            levelModifiers << QString::fromLatin1(xkb_keymap_mod_get_name(keymap, i));
+        }
+    }
     const Qt::KeyboardModifiers mods = combination.keyboardModifiers();
-    if (mods & Qt::ControlModifier) {
-        modifiers << KEY_LEFTCTRL;
-    }
-    // A symbol on a shifted level of the layout (e.g. '!') needs Shift too.
-    if ((mods & Qt::ShiftModifier) || code->level > 0) {
-        modifiers << KEY_LEFTSHIFT;
-    }
-    if (mods & Qt::AltModifier) {
-        modifiers << KEY_LEFTALT;
-    }
-    if (mods & Qt::MetaModifier) {
-        modifiers << KEY_LEFTMETA;
+    const std::optional<QList<uint32_t>> modifiers = modifierKeys({.ctrl = bool(mods & Qt::ControlModifier),
+                                                                   .shift = bool(mods & Qt::ShiftModifier),
+                                                                   .alt = bool(mods & Qt::AltModifier),
+                                                                   .meta = bool(mods & Qt::MetaModifier)},
+                                                                  levelModifiers);
+    if (!modifiers) {
+        qCWarning(WINLIKE) << "can't type" << text << ": its key needs" << levelModifiers;
+        return;
     }
 
     const auto time = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch());
     KWin::KeyboardInputRedirection *keyboard = KWin::input()->keyboard();
-    // xkb keycodes are evdev codes + 8.
-    const uint32_t key = code->keyCode - 8;
-    for (uint32_t m : modifiers) {
+    // KWin's keycodeFromKeysym already returns the evdev code (xkb minus 8).
+    const uint32_t key = code->keyCode;
+    for (uint32_t m : *modifiers) {
         keyboard->processKey(m, KWin::KeyboardKeyState::Pressed, time);
     }
     keyboard->processKey(key, KWin::KeyboardKeyState::Pressed, time);
     keyboard->processKey(key, KWin::KeyboardKeyState::Released, time);
-    for (auto it = modifiers.crbegin(); it != modifiers.crend(); ++it) {
+    for (auto it = modifiers->crbegin(); it != modifiers->crend(); ++it) {
         keyboard->processKey(*it, KWin::KeyboardKeyState::Released, time);
     }
 }
