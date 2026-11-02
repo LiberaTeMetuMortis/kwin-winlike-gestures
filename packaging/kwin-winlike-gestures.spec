@@ -44,6 +44,8 @@ BuildRequires:  pkgconfig(xkbcommon)
 Requires:       kwin6
 Requires:       kf6-kcmutils
 Requires:       kf6-kirigami
+# KeySequenceItem (org.kde.kquickcontrols), the "Press key" recorder.
+Requires:       kf6-kdeclarative-imports
 
 %description
 A KWin plugin for Plasma 6 on Wayland that adds three- and four-finger

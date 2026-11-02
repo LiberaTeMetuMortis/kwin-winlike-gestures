@@ -8,6 +8,7 @@ import QtQuick.Layouts
 import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
 import org.kde.kcmutils as KCM
+import org.kde.kquickcontrols as KQC
 
 // One gesture binding: a choice of action, plus a shortcut picker or command
 // field when the action needs one. Reads and writes kcm.value(key).
@@ -39,6 +40,7 @@ RowLayout {
         ...plasmaPresets,
         { text: i18nc("@item:inlistbox", "Other KWin shortcut…"), spec: "", custom: "shortcut" },
         { text: i18nc("@item:inlistbox", "Run command…"), spec: "", custom: "command" },
+        { text: i18nc("@item:inlistbox", "Press key…"), spec: "", custom: "key" },
         { text: i18nc("@item:inlistbox", "Do nothing"), spec: "block" },
         { text: i18nc("@item:inlistbox", "Leave to Plasma or the app"), spec: "passthrough" },
     ]
@@ -62,6 +64,9 @@ RowLayout {
         }
         if (spec.startsWith("command:")) {
             return "command";
+        }
+        if (spec.startsWith("key:")) {
+            return "key";
         }
         return "";
     }
@@ -92,6 +97,9 @@ RowLayout {
                 kcm.setValue(row.key, "shortcut:kwin/" + name);
             } else if (choice.custom === "command") {
                 kcm.setValue(row.key, "command:");
+            } else if (choice.custom === "key") {
+                // A bare "key:" means no key and would hide the recorder.
+                kcm.setValue(row.key, "key:Return");
             } else {
                 kcm.setValue(row.key, choice.spec);
             }
@@ -115,6 +123,20 @@ RowLayout {
         placeholderText: i18nc("@info:placeholder", "Command, e.g. dolphin")
         text: visible ? row.spec.slice("command:".length) : ""
         onTextEdited: kcm.setValue(row.key, "command:" + text)
+    }
+
+    KQC.KeySequenceItem {
+        enabled: kcm.pluginEnabled
+        visible: row.customKind === "key"
+        keySequence: (kcm.revision, visible ? kcm.keySequence(row.key) : "")
+        // Plain keys (arrows, Enter) are the point; it isn't a global shortcut,
+        // so there is nothing to conflict with.
+        modifierlessAllowed: true
+        modifierOnlyAllowed: false
+        multiKeyShortcutsAllowed: false
+        showClearButton: false
+        checkForConflictsAgainst: KQC.ShortcutType.None
+        onKeySequenceModified: kcm.setKeySequence(row.key, keySequence)
     }
 
     Kirigami.ContextualHelpButton {
