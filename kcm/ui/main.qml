@@ -108,7 +108,7 @@ KCM.SimpleKCM {
 
         Kirigami.Separator {
             Kirigami.FormData.isSection: true
-            Kirigami.FormData.label: i18nc("@title:group", "Conditional gestures")
+            Kirigami.FormData.label: i18nc("@title:group", "Other settings")
         }
         RowLayout {
             // As wide as a gesture dropdown, lined up with them.
@@ -121,11 +121,6 @@ KCM.SimpleKCM {
             Kirigami.ContextualHelpButton {
                 toolTipText: i18nc("@info:tooltip", "Make gestures do something else while Overview or the desktop grid is open, or while the desktop is shown. A gesture without a rule there keeps its normal action.")
             }
-        }
-
-        Kirigami.Separator {
-            Kirigami.FormData.isSection: true
-            Kirigami.FormData.label: i18nc("@title:group", "Sensitivity")
         }
         RowLayout {
             Kirigami.FormData.label: i18nc("@label:listbox", "Run actions:")
