@@ -13,4 +13,5 @@ target_link_libraries(kcm_winlikegestures PRIVATE
     KF6::CoreAddons
     KF6::I18n
     Qt6::DBus
+    Qt6::Gui
 )

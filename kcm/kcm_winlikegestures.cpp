@@ -54,21 +54,80 @@ QString KCMWinLikeGestures::defaultValue(const QString &key) const
     if (const auto it = m_defaults.constFind(key); it != m_defaults.cend()) {
         return *it;
     }
-    // A state key ("Swipe3Up.Overview") without its own rule follows the
-    // normal gesture, so the page shows that action rather than "inherit".
-    const int dot = key.indexOf(QLatin1Char('.'));
-    return dot > 0 ? value(key.left(dot)) : QStringLiteral("passthrough");
+    // A state key ("Swipe3Up.Overview") without a built-in rule is no rule.
+    return key.contains(QLatin1Char('.')) ? QStringLiteral("inherit") : QStringLiteral("passthrough");
 }
 
 QString KCMWinLikeGestures::value(const QString &key) const
 {
     const QString v = m_overrides.value(key, defaultValue(key));
-    // "inherit" written by hand (or by older versions) means the same.
-    if (v == QLatin1String("inherit")) {
-        const int dot = key.indexOf(QLatin1Char('.'));
-        return dot > 0 ? value(key.left(dot)) : QStringLiteral("passthrough");
+    // On a normal gesture, "inherit" written by hand means no binding.
+    if (v == QLatin1String("inherit") && !key.contains(QLatin1Char('.'))) {
+        return QStringLiteral("passthrough");
     }
     return v;
+}
+
+QStringList KCMWinLikeGestures::gestureKeys() const
+{
+    return WinLike::GestureConfig::gestureKeys();
+}
+
+QStringList KCMWinLikeGestures::situations() const
+{
+    return WinLike::GestureConfig::situations();
+}
+
+QStringList KCMWinLikeGestures::rules(const QString &suffix) const
+{
+    return WinLike::GestureConfig::ruleKeys(suffix, m_overrides);
+}
+
+int KCMWinLikeGestures::ruleCount() const
+{
+    int count = 0;
+    for (const QString &suffix : WinLike::GestureConfig::situations()) {
+        count += rules(suffix).size();
+    }
+    return count;
+}
+
+void KCMWinLikeGestures::addRule(const QString &key)
+{
+    // Starts as "Do nothing", so it is visibly a rule and gets saved.
+    setValue(key, QStringLiteral("block"));
+}
+
+void KCMWinLikeGestures::removeRule(const QString &key)
+{
+    // Back to no rule: drops a user rule, writes "inherit" over a built-in one.
+    setValue(key, QStringLiteral("inherit"));
+}
+
+void KCMWinLikeGestures::removeSituation(const QString &suffix)
+{
+    for (const QString &key : rules(suffix)) {
+        removeRule(key);
+    }
+}
+
+QKeySequence KCMWinLikeGestures::keySequence(const QString &key) const
+{
+    const QString v = value(key);
+    if (!v.startsWith(QLatin1String("key:"))) {
+        return {};
+    }
+    return QKeySequence::fromString(v.mid(4), QKeySequence::PortableText);
+}
+
+void KCMWinLikeGestures::setKeySequence(const QString &key, const QKeySequence &sequence)
+{
+    if (sequence.isEmpty()) {
+        setValue(key, QStringLiteral("block"));
+        return;
+    }
+    // Only the first combination is pressed, so only that one is stored.
+    setValue(key, QStringLiteral("key:") + QKeySequence(sequence[0]).toString(QKeySequence::PortableText));
 }
 
 void KCMWinLikeGestures::setValue(const QString &key, const QString &value)

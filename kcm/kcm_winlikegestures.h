@@ -8,6 +8,7 @@
 #include <KQuickConfigModule>
 #include <KSharedConfig>
 
+#include <QKeySequence>
 #include <QMap>
 #include <QStringList>
 
@@ -40,10 +41,25 @@ public:
     int revision() const { return m_revision; }
 
     // Effective value of a key: the user's override, else the built-in default,
-    // else "inherit" for state keys ("Swipe3Down.Overview") and "passthrough".
+    // else "inherit" (no rule) for state keys ("Swipe3Down.Overview") and
+    // "passthrough" for normal ones.
     Q_INVOKABLE QString value(const QString &key) const;
     Q_INVOKABLE void setValue(const QString &key, const QString &value);
     Q_INVOKABLE void resetValue(const QString &key);
+
+    // Conditional gestures. A situation is a state suffix (".Grid"); a rule is
+    // a full key ("Swipe3Left.Grid") with a binding. Call through kcm.revision.
+    Q_INVOKABLE QStringList gestureKeys() const;
+    Q_INVOKABLE QStringList situations() const;
+    Q_INVOKABLE QStringList rules(const QString &suffix) const;
+    Q_INVOKABLE int ruleCount() const;
+    Q_INVOKABLE void addRule(const QString &key);
+    Q_INVOKABLE void removeRule(const QString &key);
+    Q_INVOKABLE void removeSituation(const QString &suffix);
+
+    // "Press key" values, for the key recorder.
+    Q_INVOKABLE QKeySequence keySequence(const QString &key) const;
+    Q_INVOKABLE void setKeySequence(const QString &key, const QKeySequence &sequence);
 
 Q_SIGNALS:
     void pluginEnabledChanged();
