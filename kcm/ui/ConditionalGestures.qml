@@ -21,7 +21,7 @@ KCM.SimpleKCM {
     property var openedEmpty: []
 
     readonly property var situationInfo: ({
-        ".Grid": { title: i18nc("@title:group", "While the desktop grid is open"), icon: "view-grid-symbolic" },
+        ".Grid": { title: i18nc("@title:group", "While the desktop grid is open"), icon: "virtual-desktops" },
         ".Overview": { title: i18nc("@title:group", "While Overview is open"), icon: "view-app-grid-symbolic" },
         ".Desktop": { title: i18nc("@title:group", "While the desktop is shown"), icon: "user-desktop-symbolic" },
     })
