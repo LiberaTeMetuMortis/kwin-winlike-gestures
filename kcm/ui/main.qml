@@ -91,6 +91,23 @@ KCM.SimpleKCM {
 
         Kirigami.Separator {
             Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18nc("@title:group", "Pinch")
+        }
+        GestureRow {
+            key: "Pinch2In"
+            Kirigami.FormData.label: i18nc("@label", "Two fingers in:")
+            helpText: i18nc("@info:tooltip", "Browsers, image viewers and other apps use a two-finger pinch to zoom. Binding it here takes it away from them, so it's best left to the app.")
+        }
+        GestureRow { key: "Pinch2Out"; Kirigami.FormData.label: i18nc("@label", "Two fingers out:") }
+        GestureRow {
+            key: "Pinch3In"
+            Kirigami.FormData.label: i18nc("@label", "Three fingers in:")
+            helpText: i18nc("@info:tooltip", "Left to Plasma, a three-finger pinch zooms the whole screen (the Zoom accessibility effect). Bind both directions to use it for something else instead.")
+        }
+        GestureRow { key: "Pinch3Out"; Kirigami.FormData.label: i18nc("@label", "Three fingers out:") }
+
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
             Kirigami.FormData.label: i18nc("@title:group", "Conditional gestures")
         }
         RowLayout {
@@ -109,23 +126,6 @@ KCM.SimpleKCM {
                 toolTipText: i18nc("@info:tooltip", "Make gestures do something else while Overview or the desktop grid is open, or while the desktop is shown. A gesture without a rule there keeps its normal action.")
             }
         }
-
-        Kirigami.Separator {
-            Kirigami.FormData.isSection: true
-            Kirigami.FormData.label: i18nc("@title:group", "Pinch")
-        }
-        GestureRow {
-            key: "Pinch2In"
-            Kirigami.FormData.label: i18nc("@label", "Two fingers in:")
-            helpText: i18nc("@info:tooltip", "Browsers, image viewers and other apps use a two-finger pinch to zoom. Binding it here takes it away from them, so it's best left to the app.")
-        }
-        GestureRow { key: "Pinch2Out"; Kirigami.FormData.label: i18nc("@label", "Two fingers out:") }
-        GestureRow {
-            key: "Pinch3In"
-            Kirigami.FormData.label: i18nc("@label", "Three fingers in:")
-            helpText: i18nc("@info:tooltip", "Left to Plasma, a three-finger pinch zooms the whole screen (the Zoom accessibility effect). Bind both directions to use it for something else instead.")
-        }
-        GestureRow { key: "Pinch3Out"; Kirigami.FormData.label: i18nc("@label", "Three fingers out:") }
 
         Kirigami.Separator {
             Kirigami.FormData.isSection: true
