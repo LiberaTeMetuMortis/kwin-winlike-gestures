@@ -96,7 +96,22 @@ KCM.SimpleKCM {
 
                 required property string modelData
                 readonly property string suffix: modelData
-                readonly property var rules: page.rulesOf(suffix)
+                // Replaced only when this card's rules really change: a new array
+                // on every edit anywhere would rebuild all rows of every card.
+                property var rules: []
+                function refreshRules() {
+                    const r = kcm.rules(suffix);
+                    if (JSON.stringify(r) !== JSON.stringify(rules)) {
+                        rules = r;
+                    }
+                }
+                Component.onCompleted: refreshRules()
+                Connections {
+                    target: kcm
+                    function onRevisionChanged() {
+                        card.refreshRules();
+                    }
+                }
                 readonly property var missing: (kcm.revision, kcm.gestureKeys().filter(g => !card.rules.includes(g + card.suffix)))
 
                 Layout.fillWidth: true
@@ -138,7 +153,16 @@ KCM.SimpleKCM {
                     }
                 }
 
-                contentItem: ColumnLayout {
+                // The card's padding layout doesn't always follow a ColumnLayout
+                // whose rows were rebuilt, leaving rows outside the card. A plain
+                // Item with an explicit height binding is followed reliably.
+                contentItem: Item {
+                    implicitWidth: rows.implicitWidth
+                    implicitHeight: rows.implicitHeight
+
+                ColumnLayout {
+                    id: rows
+                    width: parent.width
                     spacing: Kirigami.Units.smallSpacing
 
                     QQC2.Label {
@@ -184,6 +208,7 @@ KCM.SimpleKCM {
                             }
                         }
                     }
+                }
                 }
             }
         }
