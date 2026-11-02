@@ -16,6 +16,7 @@ namespace
 const QString s_shortcutPrefix = QStringLiteral("shortcut:");
 const QString s_commandPrefix = QStringLiteral("command:");
 const QString s_plasmaPrefix = QStringLiteral("plasma:");
+const QString s_keyPrefix = QStringLiteral("key:");
 
 std::initializer_list<Direction> directionsOf(GestureType type)
 {
@@ -67,6 +68,14 @@ Action Action::parse(const QString &spec)
         }
         return {};
     }
+    if (s.startsWith(s_keyPrefix)) {
+        // Kept as text: turning it into keys needs QtGui and the keymap.
+        const QString key = s.mid(s_keyPrefix.size()).trimmed();
+        if (!key.isEmpty()) {
+            return {Kind::Key, {}, key};
+        }
+        return {};
+    }
     if (s.startsWith(s_commandPrefix)) {
         const QString command = s.mid(s_commandPrefix.size()).trimmed();
         if (!command.isEmpty()) {
@@ -85,6 +94,8 @@ QString Action::toString() const
         return s_shortcutPrefix + component + QLatin1Char('/') + name;
     case Kind::Command:
         return s_commandPrefix + name;
+    case Kind::Key:
+        return s_keyPrefix + name;
     case Kind::Switcher:
         return QStringLiteral("switcher");
     case Kind::Plasma:

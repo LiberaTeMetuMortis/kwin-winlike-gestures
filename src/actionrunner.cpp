@@ -55,6 +55,8 @@ void runAction(const Action &action)
             qCWarning(WINLIKE) << "failed to start" << action.name;
         }
         break;
+    case Action::Kind::Key:
+        break;
     case Action::Kind::Switcher: // driven live by GestureFilter, nothing to do at the end
     case Action::Kind::Plasma: // handed to KWin by GestureFilter
     case Action::Kind::Block:

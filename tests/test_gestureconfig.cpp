@@ -263,6 +263,23 @@ private Q_SLOTS:
         QVERIFY(GestureConfig::overrides({{QStringLiteral("Swipe4Down.Grid"), QStringLiteral("shortcut:kwin/Grid View")}}).isEmpty());
     }
 
+    void parseKey()
+    {
+        const Action a = Action::parse(QStringLiteral("key:Ctrl+Shift+T"));
+        QCOMPARE(a.kind, Action::Kind::Key);
+        QCOMPARE(a.name, QStringLiteral("Ctrl+Shift+T"));
+        QCOMPARE(a.toString(), QStringLiteral("key:Ctrl+Shift+T"));
+        QVERIFY(a.handled());
+        QCOMPARE(Action::parse(QStringLiteral(" key:Left ")).name, QStringLiteral("Left"));
+        // Empty key: nothing to press, treat as passthrough.
+        QVERIFY(!Action::parse(QStringLiteral("key:")).handled());
+    }
+
+    void keyCannotUndo()
+    {
+        QVERIFY(!Action::parse(QStringLiteral("key:Left")).canUndo());
+    }
+
     void canUndo()
     {
         // Only actions that run something can undo a swipe.

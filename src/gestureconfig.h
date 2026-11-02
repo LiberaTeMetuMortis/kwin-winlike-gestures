@@ -33,6 +33,7 @@ struct Action {
         Command, // run a shell command
         Switcher, // hold the Alt+Tab switcher open, step with finger movement
         Plasma, // hand the swipe to one of KWin's own gestures, which follow the fingers
+        Key, // press and release a key combination (name, in QKeySequence portable text)
     };
 
     Kind kind = Kind::Passthrough;
