@@ -86,6 +86,9 @@ public:
     void load(const QMap<QString, QString> &overrides);
 
     Action action(GestureType type, int fingers, Direction direction, States states = {}) const;
+    // Whether swiping back may undo `fired` by running `back`: both must be
+    // undoable (a keystroke, for one, can't be taken back).
+    static bool canReverse(const Action &fired, const Action &back) { return fired.canUndo() && back.canUndo(); }
     // True when every direction of this gesture is handled by us, so we can
     // take the whole gesture from its first event.
     bool handlesAllDirections(GestureType type, int fingers, States states = {}) const;

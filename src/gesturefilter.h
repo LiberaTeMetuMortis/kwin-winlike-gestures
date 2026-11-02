@@ -73,6 +73,8 @@ private:
     ActionTrigger m_pinchTrigger;
     // Whether this swipe already ran an action (mid-swipe timing).
     bool m_swipeFired = false;
+    // The action the last mid-swipe fire ran, for deciding whether swiping back may undo it.
+    Action m_lastFired;
     bool m_switcherOpen = false;
     // Snapshot taken when the current gesture began, used until it ends.
     States m_states;

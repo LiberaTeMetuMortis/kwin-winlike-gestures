@@ -37,7 +37,15 @@ States currentStates()
         // has its own factor, so count it once it's past halfway.
         const KWin::Effect *overview = KWin::effects->findEffect(QStringLiteral("overview"));
         const auto factor = [overview](const char *name) {
-            return overview ? overview->property(name).toReal() : 0.0;
+            const QVariant value = overview ? overview->property(name) : QVariant();
+            // A KWin update renaming these would silently turn the grid into
+            // "Overview open"; say so once.
+            static bool warned = false;
+            if (!value.isValid() && !warned) {
+                warned = true;
+                qCWarning(WINLIKE) << "can't read" << name << "from the overview effect: desktop grid rules won't apply";
+            }
+            return value.toReal();
         };
         if (factor("gridPartialActivationFactor") > 0.5 || factor("transitionPartialActivationFactor") > 0.5) {
             states |= State::GridOpen;
@@ -163,6 +171,7 @@ bool GestureFilter::swipeGestureBegin(KWin::PointerSwipeGestureBeginEvent *event
     m_swipeMode = modeFor(GestureType::Swipe, event->fingerCount);
     m_swipeTrigger.configure(m_config->triggerTiming(), m_config->triggerDistance(), m_config->reverseUndo());
     m_swipeFired = false;
+    m_lastFired = {};
     m_swipeTrigger.begin();
     qCDebug(WINLIKE) << "swipe begin, fingers:" << event->fingerCount << "states:" << m_states.toInt();
     return m_swipeMode == Mode::Owned;
@@ -224,13 +233,16 @@ bool GestureFilter::swipeGestureUpdate(KWin::PointerSwipeGestureUpdateEvent *eve
                 // run anything (switcher, block), stop here instead of letting
                 // a later forward fire repeat the first action.
                 const Direction back = opposite(m_swipe.direction());
-                if (!m_config->action(GestureType::Swipe, m_swipe.fingers(), back, m_states).canUndo()) {
-                    qCDebug(WINLIKE) << "swipe back: nothing to undo with, stopping";
+                const Action backAction = m_config->action(GestureType::Swipe, m_swipe.fingers(), back, m_states);
+                if (!GestureConfig::canReverse(m_lastFired, backAction)) {
+                    qCDebug(WINLIKE) << "swipe back: can't undo" << m_lastFired.toString() << "with" << backAction.toString() << ", stopping";
                     m_swipeTrigger.stop();
                 } else {
+                    m_lastFired = backAction;
                     finish(GestureType::Swipe, m_swipeMode, m_swipe.fingers(), back);
                 }
             } else {
+                m_lastFired = m_config->action(GestureType::Swipe, m_swipe.fingers(), m_swipe.direction(), m_states);
                 finish(GestureType::Swipe, m_swipeMode, m_swipe.fingers(), m_swipe.direction());
             }
         }

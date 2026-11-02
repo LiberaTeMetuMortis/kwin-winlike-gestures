@@ -329,6 +329,20 @@ private Q_SLOTS:
                  (QMap<QString, QString>{{QStringLiteral("Swipe3Down.Overview"), QStringLiteral("inherit")}}));
     }
 
+    void canReverseNeedsBothSides()
+    {
+        // Swiping back undoes the action that fired with the opposite one.
+        // Both must be undoable: a keystroke can't be taken back, so after
+        // Press key the swipe stops instead of running (or repeating) anything.
+        const Action shortcut = Action::parse(QStringLiteral("shortcut:kwin/Overview"));
+        const Action key = Action::parse(QStringLiteral("key:Return"));
+        const Action switcher = Action::parse(QStringLiteral("switcher"));
+        QVERIFY(GestureConfig::canReverse(shortcut, shortcut));
+        QVERIFY(!GestureConfig::canReverse(key, shortcut));
+        QVERIFY(!GestureConfig::canReverse(shortcut, key));
+        QVERIFY(!GestureConfig::canReverse(shortcut, switcher));
+    }
+
     void canUndo()
     {
         // Only actions that run something can undo a swipe.
