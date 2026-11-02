@@ -34,7 +34,7 @@ Every binding can be changed in **System Settings → Mouse & Touchpad → Touch
 Gestures** (see [Settings page](#settings-page)) or in the config file (see
 [Configuration](#configuration)).
 
-<img width="463" alt="The Touchpad Gestures settings page" src="docs/settings-page.png" />
+<img width="636" alt="The Touchpad Gestures settings page" src="docs/settings-page.png" />
 <img width="463" alt="The Conditional Gestures page, one card per situation" src="docs/conditional-gestures.png" />
 
 ---
