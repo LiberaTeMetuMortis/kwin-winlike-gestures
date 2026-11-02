@@ -20,6 +20,7 @@ namespace WinLike
 enum class State {
     OverviewOpen = 1 << 0, // suffix ".Overview"
     DesktopShown = 1 << 1, // suffix ".Desktop"
+    GridOpen = 1 << 2, // suffix ".Grid": the desktop grid (Overview's grid mode)
 };
 Q_DECLARE_FLAGS(States, State)
 Q_DECLARE_OPERATORS_FOR_FLAGS(States)

@@ -122,6 +122,8 @@ QMap<QString, QString> GestureConfig::defaults()
         // Up and down undo each other, like on Windows. Both shortcuts toggle.
         {QStringLiteral("Swipe3Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},
         {QStringLiteral("Swipe4Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},
+        {QStringLiteral("Swipe3Down.Grid"), QStringLiteral("shortcut:kwin/Grid View")},
+        {QStringLiteral("Swipe4Down.Grid"), QStringLiteral("shortcut:kwin/Grid View")},
         {QStringLiteral("Swipe3Up.Desktop"), QStringLiteral("shortcut:kwin/Show Desktop")},
         {QStringLiteral("Swipe4Up.Desktop"), QStringLiteral("shortcut:kwin/Show Desktop")},
     };
@@ -182,10 +184,13 @@ void GestureConfig::load(const QMap<QString, QString> &overrides)
 Action GestureConfig::action(GestureType type, int fingers, Direction direction, States states) const
 {
     const QString base = key(type, fingers, direction);
-    // Overview is drawn on top of a shown desktop, so while it is open only
-    // .Overview rules apply: without one, the normal key, never .Desktop.
+    // The grid and Overview are drawn on top of a shown desktop, so only the
+    // topmost state's rules apply: without one, the normal key, never another
+    // state's rule.
     QString suffix;
-    if (states.testFlag(State::OverviewOpen)) {
+    if (states.testFlag(State::GridOpen)) {
+        suffix = QStringLiteral(".Grid");
+    } else if (states.testFlag(State::OverviewOpen)) {
         suffix = QStringLiteral(".Overview");
     } else if (states.testFlag(State::DesktopShown)) {
         suffix = QStringLiteral(".Desktop");

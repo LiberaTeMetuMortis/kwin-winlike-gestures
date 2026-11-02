@@ -46,6 +46,8 @@ RowLayout {
     // name them for what they do there.
     readonly property var stateNames: key.endsWith(".Overview")
         ? { "shortcut:kwin/Overview": i18nc("@item:inlistbox", "Close Overview") }
+        : key.endsWith(".Grid")
+        ? { "shortcut:kwin/Grid View": i18nc("@item:inlistbox", "Close desktop grid") }
         : key.endsWith(".Desktop")
             ? { "shortcut:kwin/Show Desktop": i18nc("@item:inlistbox", "Bring windows back") }
             : {}

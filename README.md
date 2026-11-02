@@ -23,10 +23,10 @@ Built and tested against **KWin / Plasma 6.8.1** on openSUSE Tumbleweed.
 | Gesture | Action |
 |---|---|
 | 3-finger swipe up | Overview (like Windows Task View). **If the desktop is shown:** bring the windows back |
-| 3-finger swipe down | Show Desktop. **If Overview is open:** close Overview |
+| 3-finger swipe down | Show Desktop. **If Overview is open:** close Overview. **If the desktop grid is open:** close the grid |
 | 3-finger swipe left / right | **Alt+Tab switcher.** Opens and stays open while your fingers are down; keep sliding left/right/up/down to move the selection (like the arrow keys); lift to switch. A quick flick jumps to the previous window. |
 | 4-finger swipe up | Same as 3-finger up (including the desktop-shown rule) |
-| 4-finger swipe down | Same as 3-finger down (including the Overview rule) |
+| 4-finger swipe down | Same as 3-finger down (including the Overview and grid rules) |
 | 4-finger swipe left / right | **Slide between virtual desktops**, using Plasma's own animation, which follows your fingers. The desktop moves with them, so swiping left brings in the desktop on the right. Swipe back before lifting to stay where you are. |
 | 2-finger scroll, pinch-zoom, 2-finger tap | Untouched: handled by libinput and apps, already like Windows |
 
@@ -313,15 +313,21 @@ The new bindings apply to the next gesture.
 
 ### State-dependent bindings
 
-When a gesture starts, the plugin takes a snapshot of two desktop states:
+When a gesture starts, the plugin takes a snapshot of three desktop states:
 
-* **Overview open:** `effects->isEffectActive("overview")`
+* **Desktop grid open:** the `overview` effect is active and its
+  `gridPartialActivationFactor` (or, mid overview-to-grid gesture,
+  `transitionPartialActivationFactor`) is past 0.5. The grid is a mode of KWin's
+  Overview effect, so this is read from the effect's properties.
+* **Overview open:** `effects->isEffectActive("overview")`, and the grid isn't
 * **Desktop shown:** `workspace()->showingDesktop()`
 
-A binding with a state suffix (`Swipe3Down.Overview`, `Swipe3Up.Desktop`) wins over the
-plain one while that state holds. If both states hold, only `.Overview` rules apply
-(Overview is drawn on top): without one, the plain key is used, never the `.Desktop`
-rule. That snapshot is used for the gesture's first action, so the state changing
+A binding with a state suffix (`Swipe3Down.Overview`, `Swipe3Down.Grid`,
+`Swipe3Up.Desktop`) wins over the plain one while that state holds. Only the topmost
+state's rules apply (grid, then Overview, then the shown desktop): without one, the
+plain key is used, never another state's rule. So with the grid open, a missing `.Grid`
+rule falls back to the plain key, not to `.Overview`.
+That snapshot is used for the gesture's first action, so the state changing
 halfway through (e.g. Overview opening) doesn't switch actions mid-swipe; only a swipe
 back to undo looks at the state again.
 
@@ -531,13 +537,14 @@ kcm_winlikegestures`). It has:
 
 * **Touchpad gestures on/off.** On Apply it writes `winlikegesturesEnabled` to `kwinrc`
   *and* loads or unloads the plugin in the running KWin, so it takes effect at once.
-* A dropdown per gesture: 3- and 4-finger swipes, the *While Overview is open* and
-  *While the desktop is shown* states, and 2/3-finger pinch. Choices: Overview, Show
+* A dropdown per gesture: 3- and 4-finger swipes, the *While Overview is open*,
+  *While the desktop grid is open* and *While the desktop is shown* states, and 2/3-finger pinch. Choices: Overview, Show
   desktop, Window switcher, Next/Previous virtual desktop, Desktop grid, for swipes the
   animated *Slide to the desktop on the right/left/below/above*, *Overview (follows
   fingers)* and *Desktop grid (follows fingers)*, *Other KWin shortcut…* (picker listing
   every KWin shortcut), *Run command…*, Do nothing, Leave to Plasma or the app. State rows you haven't changed show the normal gesture's action
-  (with Overview open, "Overview" shows as *Close Overview*, since it toggles).
+  (with Overview open, "Overview" shows as *Close Overview*, since it toggles; likewise
+  *Close desktop grid*).
 * **Run actions:** *When fingers lift* (default) or *Mid-swipe, after a set distance*,
   with a slider for that distance, and **Swipe back to undo** (mid-swipe only).
 * Sliders for swipe threshold, switcher sideways step, switcher up/down step and pinch
@@ -574,7 +581,9 @@ Pinch3In=command:dolphin
 
 # State-specific: wins over the plain key while that state holds
 #   .Overview  Overview is open      .Desktop  Show Desktop is active
+#   .Grid      the desktop grid is open
 Swipe3Down.Overview=shortcut:kwin/Overview      # close Overview (the shortcut toggles)
+Swipe3Down.Grid=shortcut:kwin/Grid View         # close the desktop grid
 Swipe3Up.Desktop=shortcut:kwin/Show Desktop     # bring the windows back
 
 # Tuning
@@ -627,7 +636,8 @@ and does:
 journalctl --user -f | grep -E 'swipe|pinch|switcher|running|config loaded'
 ```
 
-`states:` in the log is a bit mask: 1 = Overview open, 2 = desktop shown.
+`states:` in the log is a bit mask: 1 = Overview open, 2 = desktop shown, 4 = desktop
+grid open.
 
 * **Is it loaded?**
   `qdbus6 org.kde.KWin /Plugins org.kde.KWin.Plugins.LoadedPlugins`

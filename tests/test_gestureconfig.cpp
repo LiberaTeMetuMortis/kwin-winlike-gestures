@@ -221,6 +221,48 @@ private Q_SLOTS:
         QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left, State::DesktopShown).name, QStringLiteral("b"));
     }
 
+    void gridDefaults()
+    {
+        GestureConfig c;
+        // Grid open: swipe down closes it (the Grid View shortcut toggles).
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Down, State::GridOpen).name, QStringLiteral("Grid View"));
+        QCOMPARE(c.action(GestureType::Swipe, 4, Direction::Down, State::GridOpen).name, QStringLiteral("Grid View"));
+        // No .Grid rule: the normal key (up opens Overview from the grid).
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Up, State::GridOpen).name, QStringLiteral("Overview"));
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left, State::GridOpen).kind, Action::Kind::Switcher);
+        // .Grid rules don't leak into the other states.
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Down, State::OverviewOpen).name, QStringLiteral("Overview"));
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Down).name, QStringLiteral("Show Desktop"));
+    }
+
+    void gridIgnoresOverviewAndDesktopRules()
+    {
+        // The grid is drawn on top of everything: while it is open only .Grid
+        // rules apply, else the normal key, never .Overview or .Desktop.
+        GestureConfig c;
+        c.load({
+            {QStringLiteral("Swipe3Left.Overview"), QStringLiteral("command:a")},
+            {QStringLiteral("Swipe3Left.Desktop"), QStringLiteral("command:b")},
+            {QStringLiteral("Swipe3Right.Grid"), QStringLiteral("command:c")},
+        });
+        const States all = State::GridOpen | State::OverviewOpen | State::DesktopShown;
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Left, all).kind, Action::Kind::Switcher);
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Right, all).name, QStringLiteral("c"));
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Right, State::OverviewOpen).kind, Action::Kind::Switcher);
+    }
+
+    void gridOverridesAndInherit()
+    {
+        GestureConfig c;
+        c.load({{QStringLiteral("Swipe3Down.Grid"), QStringLiteral("passthrough")}});
+        QVERIFY(!c.handlesAllDirections(GestureType::Swipe, 3, State::GridOpen));
+        QVERIFY(c.handlesAllDirections(GestureType::Swipe, 3, State::OverviewOpen));
+        c.load({{QStringLiteral("Swipe3Down.Grid"), QStringLiteral("inherit")}});
+        QCOMPARE(c.action(GestureType::Swipe, 3, Direction::Down, State::GridOpen).name, QStringLiteral("Show Desktop"));
+        // A default .Grid rule written back unchanged is dropped from overrides.
+        QVERIFY(GestureConfig::overrides({{QStringLiteral("Swipe4Down.Grid"), QStringLiteral("shortcut:kwin/Grid View")}}).isEmpty());
+    }
+
     void canUndo()
     {
         // Only actions that run something can undo a swipe.

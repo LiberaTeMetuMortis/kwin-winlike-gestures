@@ -32,7 +32,18 @@ States currentStates()
     States states;
     // effects is null while compositing is off.
     if (KWin::effects && KWin::effects->isEffectActive(QStringLiteral("overview"))) {
-        states |= State::OverviewOpen;
+        // The desktop grid is a mode of the same effect. Its toggle state sits
+        // at 1 while the grid is shown; the overview-to-grid transition gesture
+        // has its own factor, so count it once it's past halfway.
+        const KWin::Effect *overview = KWin::effects->findEffect(QStringLiteral("overview"));
+        const auto factor = [overview](const char *name) {
+            return overview ? overview->property(name).toReal() : 0.0;
+        };
+        if (factor("gridPartialActivationFactor") > 0.5 || factor("transitionPartialActivationFactor") > 0.5) {
+            states |= State::GridOpen;
+        } else {
+            states |= State::OverviewOpen;
+        }
     }
     if (KWin::workspace()->showingDesktop()) {
         states |= State::DesktopShown;

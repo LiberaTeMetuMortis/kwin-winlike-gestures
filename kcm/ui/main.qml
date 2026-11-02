@@ -104,6 +104,19 @@ KCM.SimpleKCM {
 
         Kirigami.Separator {
             Kirigami.FormData.isSection: true
+            Kirigami.FormData.label: i18nc("@title:group", "While the desktop grid is open")
+        }
+        GestureRow {
+            key: "Swipe3Up.Grid"
+            Kirigami.FormData.label: i18nc("@label", "Three fingers up:")
+            helpText: i18nc("@info:tooltip", "These replace the normal gestures while the desktop grid is open. Rows you haven't changed follow the normal gesture above, not the Overview section. The desktop grid opens and closes with the same action, so in this section it shows as \"Close desktop grid\".")
+        }
+        GestureRow { key: "Swipe3Down.Grid"; Kirigami.FormData.label: i18nc("@label", "Three fingers down:") }
+        GestureRow { key: "Swipe4Up.Grid"; Kirigami.FormData.label: i18nc("@label", "Four fingers up:") }
+        GestureRow { key: "Swipe4Down.Grid"; Kirigami.FormData.label: i18nc("@label", "Four fingers down:") }
+
+        Kirigami.Separator {
+            Kirigami.FormData.isSection: true
             Kirigami.FormData.label: i18nc("@title:group", "While the desktop is shown")
         }
         GestureRow {
