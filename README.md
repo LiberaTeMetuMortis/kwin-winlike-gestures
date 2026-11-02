@@ -323,7 +323,9 @@ When a gesture starts, the plugin takes a snapshot of three desktop states:
 * **Desktop shown:** `workspace()->showingDesktop()`
 
 A binding with a state suffix (`Swipe3Down.Overview`, `Swipe3Down.Grid`,
-`Swipe3Up.Desktop`) wins over the plain one while that state holds. Only the topmost
+`Swipe3Up.Desktop`, any gesture including pinches) is a conditional rule: it wins over
+the plain one while that state holds. `inherit` on a state key means "no rule here" (the
+settings page writes it when you delete a built-in rule). Only the topmost
 state's rules apply (grid, then Overview, then the shown desktop): without one, the
 plain key is used, never another state's rule. So with the grid open, a missing `.Grid`
 rule falls back to the plain key, not to `.Overview`.
@@ -537,14 +539,20 @@ kcm_winlikegestures`). It has:
 
 * **Touchpad gestures on/off.** On Apply it writes `winlikegesturesEnabled` to `kwinrc`
   *and* loads or unloads the plugin in the running KWin, so it takes effect at once.
-* A dropdown per gesture: 3- and 4-finger swipes, the *While Overview is open*,
-  *While the desktop grid is open* and *While the desktop is shown* states, and 2/3-finger pinch. Choices: Overview, Show
-  desktop, Window switcher, Next/Previous virtual desktop, Desktop grid, for swipes the
-  animated *Slide to the desktop on the right/left/below/above*, *Overview (follows
+* A dropdown per gesture: 3- and 4-finger swipes and 2/3-finger pinch. Choices: Overview,
+  Show desktop, Window switcher, Next/Previous virtual desktop, Desktop grid, for swipes
+  the animated *Slide to the desktop on the right/left/below/above*, *Overview (follows
   fingers)* and *Desktop grid (follows fingers)*, *Other KWin shortcut…* (picker listing
-  every KWin shortcut), *Run command…*, Do nothing, Leave to Plasma or the app. State rows you haven't changed show the normal gesture's action
-  (with Overview open, "Overview" shows as *Close Overview*, since it toggles; likewise
-  *Close desktop grid*).
+  every KWin shortcut), *Run command…*, *Press key…* (records a key combination, e.g.
+  an arrow key, Enter or Ctrl+Shift+T), Do nothing, Leave to Plasma or the app.
+* **Conditional gestures:** "Special situations: N rules — Edit…" opens a page with one
+  card per situation (*While the desktop grid is open*, *While Overview is open*,
+  *While the desktop is shown*). Each card lists the gestures that do something else in
+  that situation; any gesture without a rule there keeps its normal action. **Add New**
+  adds a situation, **Add Gesture…** adds a rule (it starts as *Do nothing*), the trash
+  buttons remove a rule or the whole situation. The built-in rules show up as ordinary
+  rules and can be changed or deleted. In a situation, a toggle shows as what it does
+  there: *Close Overview*, *Close desktop grid*, *Bring windows back*.
 * **Run actions:** *When fingers lift* (default) or *Mid-swipe, after a set distance*,
   with a slider for that distance, and **Swipe back to undo** (mid-swipe only).
 * Sliders for swipe threshold, switcher sideways step, switcher up/down step and pinch
