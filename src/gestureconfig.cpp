@@ -43,6 +43,9 @@ Action Action::parse(const QString &spec)
     if (s == QLatin1String("switcher")) {
         return {Kind::Switcher, {}, {}};
     }
+    if (s == QLatin1String("arrows")) {
+        return {Kind::Arrows, {}, {}};
+    }
     if (s.startsWith(s_shortcutPrefix)) {
         const QString rest = s.mid(s_shortcutPrefix.size());
         const int slash = rest.indexOf(QLatin1Char('/'));
@@ -98,6 +101,8 @@ QString Action::toString() const
         return s_keyPrefix + name;
     case Kind::Switcher:
         return QStringLiteral("switcher");
+    case Kind::Arrows:
+        return QStringLiteral("arrows");
     case Kind::Plasma:
         return s_plasmaPrefix + QString::number(targetFingers) + directionName(targetDirection);
     case Kind::Passthrough:
@@ -134,9 +139,10 @@ QMap<QString, QString> GestureConfig::defaults()
         {QStringLiteral("Swipe3Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},
         {QStringLiteral("Swipe4Down.Overview"), QStringLiteral("shortcut:kwin/Overview")},
         // In the desktop grid, 3 fingers act like its arrow keys and Enter:
-        // move the highlight between windows, then open the highlighted one.
-        {QStringLiteral("Swipe3Left.Grid"), QStringLiteral("key:Left")},
-        {QStringLiteral("Swipe3Right.Grid"), QStringLiteral("key:Right")},
+        // slide to move the highlight between windows (up and down too, once
+        // a sideways swipe started), then swipe down to open the highlighted one.
+        {QStringLiteral("Swipe3Left.Grid"), QStringLiteral("arrows")},
+        {QStringLiteral("Swipe3Right.Grid"), QStringLiteral("arrows")},
         {QStringLiteral("Swipe3Down.Grid"), QStringLiteral("key:Return")},
         {QStringLiteral("Swipe4Down.Grid"), QStringLiteral("shortcut:kwin/Grid View")},
         {QStringLiteral("Swipe3Up.Desktop"), QStringLiteral("shortcut:kwin/Show Desktop")},

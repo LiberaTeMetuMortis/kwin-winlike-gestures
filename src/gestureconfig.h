@@ -35,6 +35,7 @@ struct Action {
         Switcher, // hold the Alt+Tab switcher open, step with finger movement
         Plasma, // hand the swipe to one of KWin's own gestures, which follow the fingers
         Key, // press and release a key combination (name, in QKeySequence portable text)
+        Arrows, // press arrow keys live as the fingers slide, like the switcher without Alt+Tab
     };
 
     Kind kind = Kind::Passthrough;

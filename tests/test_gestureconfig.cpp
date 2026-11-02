@@ -227,10 +227,10 @@ private Q_SLOTS:
         const auto grid = [&](int f, Direction d) {
             return c.action(GestureType::Swipe, f, d, State::GridOpen);
         };
-        // 3 left/right move the grid's highlight, 3 down opens it, 4 down closes the grid.
-        QCOMPARE(grid(3, Direction::Left).kind, Action::Kind::Key);
-        QCOMPARE(grid(3, Direction::Left).name, QStringLiteral("Left"));
-        QCOMPARE(grid(3, Direction::Right).name, QStringLiteral("Right"));
+        // 3 left/right start arrow-key sliding through the grid, 3 down opens
+        // the highlighted window, 4 down closes the grid.
+        QCOMPARE(grid(3, Direction::Left).kind, Action::Kind::Arrows);
+        QCOMPARE(grid(3, Direction::Right).kind, Action::Kind::Arrows);
         QCOMPARE(grid(3, Direction::Down).name, QStringLiteral("Return"));
         QCOMPARE(grid(4, Direction::Down).name, QStringLiteral("Grid View"));
         // No .Grid rule: the normal key.
@@ -282,6 +282,16 @@ private Q_SLOTS:
         QCOMPARE(Action::parse(QStringLiteral(" key:Left ")).name, QStringLiteral("Left"));
         // Empty key: nothing to press, treat as passthrough.
         QVERIFY(!Action::parse(QStringLiteral("key:")).handled());
+    }
+
+    void parseArrows()
+    {
+        const Action a = Action::parse(QStringLiteral(" arrows "));
+        QCOMPARE(a.kind, Action::Kind::Arrows);
+        QCOMPARE(a.toString(), QStringLiteral("arrows"));
+        QVERIFY(a.handled());
+        // Driven live like the switcher: nothing to undo by swiping back.
+        QVERIFY(!a.canUndo());
     }
 
     void keyCannotUndo()

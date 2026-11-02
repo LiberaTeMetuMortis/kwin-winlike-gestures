@@ -58,6 +58,7 @@ private:
     void openSwitcher(std::chrono::microseconds time);
     void stepSwitcher(const QPoint &steps, std::chrono::microseconds time);
     void closeSwitcher(bool accept, std::chrono::microseconds time);
+    void startArrows(Direction locked, std::chrono::microseconds time);
 
     // Gives the swipe to KWin's gesture `action` names, movement so far included.
     void handToKWin(const Action &action, std::chrono::microseconds time);
@@ -76,6 +77,9 @@ private:
     // The action the last mid-swipe fire ran, for deciding whether swiping back may undo it.
     Action m_lastFired;
     bool m_switcherOpen = false;
+    // "arrows": slide to press arrow keys until the fingers lift. Nothing is
+    // held down, so there is nothing to release when it ends.
+    bool m_arrowsActive = false;
     // Snapshot taken when the current gesture began, used until it ends.
     States m_states;
     Mode m_swipeMode = Mode::Ignored;

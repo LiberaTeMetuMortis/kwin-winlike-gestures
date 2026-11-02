@@ -124,6 +124,7 @@ void runAction(const Action &action)
     case Action::Kind::Key:
         pressKey(action.name);
         break;
+    case Action::Kind::Arrows: // driven live by GestureFilter
     case Action::Kind::Switcher: // driven live by GestureFilter, nothing to do at the end
     case Action::Kind::Plasma: // handed to KWin by GestureFilter
     case Action::Kind::Block:

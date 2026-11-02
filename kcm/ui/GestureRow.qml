@@ -34,6 +34,7 @@ RowLayout {
         { text: i18nc("@item:inlistbox", "Overview"), spec: "shortcut:kwin/Overview" },
         { text: i18nc("@item:inlistbox", "Show desktop"), spec: "shortcut:kwin/Show Desktop" },
         { text: i18nc("@item:inlistbox", "Window switcher (hold and slide)"), spec: "switcher" },
+        { text: i18nc("@item:inlistbox", "Arrow keys (hold and slide)"), spec: "arrows" },
         { text: i18nc("@item:inlistbox", "Next virtual desktop"), spec: "shortcut:kwin/Switch to Next Desktop" },
         { text: i18nc("@item:inlistbox", "Previous virtual desktop"), spec: "shortcut:kwin/Switch to Previous Desktop" },
         { text: i18nc("@item:inlistbox", "Desktop grid"), spec: "shortcut:kwin/Grid View" },

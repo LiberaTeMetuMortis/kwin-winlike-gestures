@@ -145,7 +145,7 @@ KCM.SimpleKCM {
                 onActivated: index => kcm.setValue("TriggerTiming", choices[index].value)
             }
             Kirigami.ContextualHelpButton {
-                toolTipText: i18nc("@info:tooltip", "When fingers lift: the action runs when you finish the swipe, so you can still change your mind. Mid-swipe: it runs as soon as you've swiped the set distance, while your fingers are still moving, which feels faster and isn't lost if your fingers lift unevenly. The window switcher always follows your fingers either way.")
+                toolTipText: i18nc("@info:tooltip", "When fingers lift: the action runs when you finish the swipe, so you can still change your mind. Mid-swipe: it runs as soon as you've swiped the set distance, while your fingers are still moving, which feels faster and isn't lost if your fingers lift unevenly. The window switcher and arrow-key sliding always follow your fingers either way.")
             }
         }
         TuningSlider {
@@ -179,7 +179,7 @@ KCM.SimpleKCM {
         TuningSlider {
             Kirigami.FormData.label: i18nc("@label:slider", "Switcher moves sideways every:")
             key: "SwitcherStep"
-            helpText: i18nc("@info:tooltip", "How far to slide left or right in the window switcher to move to the next window.")
+            helpText: i18nc("@info:tooltip", "How far to slide left or right in the window switcher to move to the next window. Also used by \"Arrow keys (hold and slide)\" for each Left or Right press.")
             from: 40; to: 300; stepSize: 10
             lowText: i18nc("@label:slider short distance", "Short")
             highText: i18nc("@label:slider long distance", "Long")
@@ -187,7 +187,7 @@ KCM.SimpleKCM {
         TuningSlider {
             Kirigami.FormData.label: i18nc("@label:slider", "Switcher moves up/down every:")
             key: "SwitcherStepVertical"
-            helpText: i18nc("@info:tooltip", "How far to slide up or down in the window switcher to move to the next row (or the next window, if the switcher is a single row). Touchpads are shorter than they are wide, so this is shorter by default.")
+            helpText: i18nc("@info:tooltip", "How far to slide up or down in the window switcher to move to the next row (or the next window, if the switcher is a single row). Touchpads are shorter than they are wide, so this is shorter by default. Also used by \"Arrow keys (hold and slide)\" for each Up or Down press.")
             from: 20; to: 300; stepSize: 10
             lowText: i18nc("@label:slider short distance", "Short")
             highText: i18nc("@label:slider long distance", "Long")

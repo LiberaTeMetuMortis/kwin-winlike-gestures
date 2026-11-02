@@ -24,7 +24,7 @@ Built and tested against **KWin / Plasma 6.8.1** on openSUSE Tumbleweed.
 |---|---|
 | 3-finger swipe up | Overview (like Windows Task View). **If the desktop is shown:** bring the windows back |
 | 3-finger swipe down | Show Desktop. **If Overview is open:** close Overview. **If the desktop grid is open:** open the highlighted window |
-| 3-finger swipe left / right | **Alt+Tab switcher.** Opens and stays open while your fingers are down; keep sliding left/right/up/down to move the selection (like the arrow keys); lift to switch. A quick flick jumps to the previous window. **If the desktop grid is open:** move the grid's highlight one window left/right instead (it presses the arrow key) |
+| 3-finger swipe left / right | **Alt+Tab switcher.** Opens and stays open while your fingers are down; keep sliding left/right/up/down to move the selection (like the arrow keys); lift to switch. A quick flick jumps to the previous window. **If the desktop grid is open:** slide through the grid instead: the swipe presses Left/Right, and while your fingers stay down, each further step sideways or up/down presses another arrow key, moving the grid's highlight; lift, then swipe 3 fingers down to open the highlighted window |
 | 4-finger swipe up | Same as 3-finger up (including the desktop-shown rule) |
 | 4-finger swipe down | Same as 3-finger down (including the Overview rule). **If the desktop grid is open:** close the grid |
 | 4-finger swipe left / right | **Slide between virtual desktops**, using Plasma's own animation, which follows your fingers. The desktop moves with them, so swiping left brings in the desktop on the right. Swipe back before lifting to stay where you are. |
@@ -295,6 +295,11 @@ recreates that with key events injected through KWin's own keyboard pipeline
 The filter's destructor releases Alt if the plugin is unloaded mid-gesture, so Alt
 can't get stuck down.
 
+`arrows` (the desktop grid's default for 3-finger left/right) is the same without
+Alt+Tab: the locking swipe taps its own arrow key, then `SwitcherNavigator` taps
+Left/Right/Up/Down per step until the fingers lift. Nothing is held down, so ending or
+cancelling it has nothing to release.
+
 ### Config reload
 
 The plugin follows KDE's standard pattern instead of polling or watching files:
@@ -542,7 +547,7 @@ kcm_winlikegestures`). It has:
 * **Touchpad gestures on/off.** On Apply it writes `winlikegesturesEnabled` to `kwinrc`
   *and* loads or unloads the plugin in the running KWin, so it takes effect at once.
 * A dropdown per gesture: 3- and 4-finger swipes and 2/3-finger pinch. Choices: Overview,
-  Show desktop, Window switcher, Next/Previous virtual desktop, Desktop grid, for swipes
+  Show desktop, Window switcher, Arrow keys (hold and slide), Next/Previous virtual desktop, Desktop grid, for swipes
   the animated *Slide to the desktop on the right/left/below/above*, *Overview (follows
   fingers)* and *Desktop grid (follows fingers)*, *Other KWin shortcut…* (picker listing
   every KWin shortcut), *Run command…*, *Press key…* (records a key combination, e.g.
@@ -594,7 +599,8 @@ Pinch3In=command:dolphin
 #   .Overview  Overview is open      .Desktop  Show Desktop is active
 #   .Grid      the desktop grid is open
 Swipe3Down.Overview=shortcut:kwin/Overview      # close Overview (the shortcut toggles)
-Swipe3Left.Grid=key:Left                        # move the grid's highlight
+Swipe3Left.Grid=arrows                          # slide through the grid with arrow keys
+Swipe3Down.Grid=key:Return                      # open the highlighted window
 Swipe4Down.Grid=shortcut:kwin/Grid View         # close the desktop grid
 Swipe3Up.Desktop=shortcut:kwin/Show Desktop     # bring the windows back
 
@@ -614,6 +620,7 @@ ReverseUndo=false           # midswipe only: swipe back the other way to undo
 | `command:<shell command>` | Run a command |
 | `key:<keys>` | Press and release a key combination, as if typed: `key:Left`, `key:Return`, `key:Ctrl+Shift+T` (Qt's key names) |
 | `switcher` | Live Alt+Tab switcher (meant for horizontal swipes) |
+| `arrows` | Arrow keys, live: presses the swipe's arrow, then one arrow key per step while the fingers slide (same step distances as the switcher). Used in the desktop grid |
 | `plasma:<3\|4><Up\|Down\|Left\|Right>` | Swipes only: hand the swipe to that KWin gesture, which follows the fingers (see [Handing a swipe to Plasma's own gestures](#handing-a-swipe-to-plasmas-own-gestures)) |
 | `block` | Swallow the gesture and do nothing |
 | `passthrough` | Leave the gesture to KWin / the focused app |

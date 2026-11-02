@@ -129,6 +129,19 @@ void GestureFilter::stepSwitcher(const QPoint &steps, std::chrono::microseconds 
     }
 }
 
+// Like the switcher without Alt+Tab: the swipe that locked presses its own
+// arrow, then sliding steps with arrow keys the same way the switcher does.
+void GestureFilter::startArrows(Direction locked, std::chrono::microseconds time)
+{
+    qCDebug(WINLIKE) << "arrows start";
+    m_navigator.setStepDistances(m_config->switcherStep(), m_config->switcherStepVertical());
+    m_navigator.reset();
+    m_arrowsActive = true;
+    const QPoint first(locked == Direction::Right ? 1 : locked == Direction::Left ? -1 : 0,
+                       locked == Direction::Down ? 1 : locked == Direction::Up ? -1 : 0);
+    stepSwitcher(first, time);
+}
+
 void GestureFilter::closeSwitcher(bool accept, std::chrono::microseconds time)
 {
     qCDebug(WINLIKE) << "switcher close, accept:" << accept;
@@ -172,6 +185,7 @@ bool GestureFilter::swipeGestureBegin(KWin::PointerSwipeGestureBeginEvent *event
     m_swipeTrigger.configure(m_config->triggerTiming(), m_config->triggerDistance(), m_config->reverseUndo());
     m_swipeFired = false;
     m_lastFired = {};
+    m_arrowsActive = false;
     m_swipeTrigger.begin();
     qCDebug(WINLIKE) << "swipe begin, fingers:" << event->fingerCount << "states:" << m_states.toInt();
     return m_swipeMode == Mode::Owned;
@@ -211,14 +225,16 @@ bool GestureFilter::swipeGestureUpdate(KWin::PointerSwipeGestureUpdateEvent *eve
         }
         if (action.kind == Action::Kind::Switcher) {
             openSwitcher(event->time);
+        } else if (action.kind == Action::Kind::Arrows) {
+            startArrows(locked, event->time);
         }
-    } else if (m_switcherOpen) {
+    } else if (m_switcherOpen || m_arrowsActive) {
         const QPoint steps = m_navigator.update(event->delta);
         if (!steps.isNull()) {
             stepSwitcher(steps, event->time);
         }
     }
-    if (!m_switcherOpen && m_swipe.direction() != Direction::None) {
+    if (!m_switcherOpen && !m_arrowsActive && m_swipe.direction() != Direction::None) {
         const ActionTrigger::Fire fire = m_swipeTrigger.update(m_swipe.progress());
         if (fire != ActionTrigger::Fire::None) {
             // After the first action the desktop has changed (e.g. Overview is
@@ -260,9 +276,12 @@ bool GestureFilter::swipeGestureEnd(KWin::PointerSwipeGestureEndEvent *event)
         forward(&KWin::InputEventFilter::swipeGestureEnd, *event);
     } else if (m_switcherOpen) {
         closeSwitcher(true, event->time);
+    } else if (m_arrowsActive) {
+        qCDebug(WINLIKE) << "arrows end";
     } else if (m_swipeTrigger.end()) {
         finish(GestureType::Swipe, mode, m_swipe.fingers(), m_swipe.direction());
     }
+    m_arrowsActive = false;
     m_swipe.reset();
     m_swipeMode = Mode::Ignored;
     return mode == Mode::Owned || mode == Mode::Handed;
@@ -281,6 +300,7 @@ bool GestureFilter::swipeGestureCancelled(KWin::PointerSwipeGestureCancelEvent *
     if (m_switcherOpen) {
         closeSwitcher(false, event->time);
     }
+    m_arrowsActive = false;
     m_swipe.reset();
     m_swipeMode = Mode::Ignored;
     return mode == Mode::Owned || mode == Mode::Handed;
