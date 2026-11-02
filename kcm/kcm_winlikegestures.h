@@ -52,7 +52,6 @@ public:
     Q_INVOKABLE QStringList gestureKeys() const;
     Q_INVOKABLE QStringList situations() const;
     Q_INVOKABLE QStringList rules(const QString &suffix) const;
-    Q_INVOKABLE int ruleCount() const;
     Q_INVOKABLE void addRule(const QString &key);
     Q_INVOKABLE void removeRule(const QString &key);
     Q_INVOKABLE void removeSituation(const QString &suffix);

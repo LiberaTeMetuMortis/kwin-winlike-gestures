@@ -83,15 +83,6 @@ QStringList KCMWinLikeGestures::rules(const QString &suffix) const
     return WinLike::GestureConfig::ruleKeys(suffix, m_overrides);
 }
 
-int KCMWinLikeGestures::ruleCount() const
-{
-    int count = 0;
-    for (const QString &suffix : WinLike::GestureConfig::situations()) {
-        count += rules(suffix).size();
-    }
-    return count;
-}
-
 void KCMWinLikeGestures::addRule(const QString &key)
 {
     // A built-in rule comes back as it was; a new one starts as "Do nothing",

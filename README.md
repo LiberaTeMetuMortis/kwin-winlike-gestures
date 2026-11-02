@@ -552,7 +552,7 @@ kcm_winlikegestures`). It has:
   fingers)* and *Desktop grid (follows fingers)*, *Other KWin shortcut…* (picker listing
   every KWin shortcut), *Run command…*, *Press key…* (records a key combination, e.g.
   an arrow key, Enter or Ctrl+Shift+T), Do nothing, Leave to Plasma or the app.
-* **Conditional gestures:** "Special situations: N rules — Edit…" opens a page with one
+* **Conditional gestures:** the **Edit Conditional Gestures…** button opens a page with one
   card per situation (*While the desktop grid is open*, *While Overview is open*,
   *While the desktop is shown*). Each card lists the gestures that do something else in
   that situation; any gesture without a rule there keeps its normal action. **Add New**
