@@ -289,6 +289,46 @@ private Q_SLOTS:
         QVERIFY(!Action::parse(QStringLiteral("key:Left")).canUndo());
     }
 
+    void ruleKeysDefaults()
+    {
+        QCOMPARE(GestureConfig::ruleKeys(QStringLiteral(".Grid"), {}),
+                 (QStringList{QStringLiteral("Swipe3Down.Grid"),
+                              QStringLiteral("Swipe3Left.Grid"),
+                              QStringLiteral("Swipe3Right.Grid"),
+                              QStringLiteral("Swipe4Down.Grid")}));
+        QCOMPARE(GestureConfig::ruleKeys(QStringLiteral(".Overview"), {}).size(), 2);
+        QCOMPARE(GestureConfig::ruleKeys(QStringLiteral(".Desktop"), {}).size(), 2);
+        QCOMPARE(GestureConfig::situations(), (QStringList{QStringLiteral(".Grid"), QStringLiteral(".Overview"), QStringLiteral(".Desktop")}));
+        QCOMPARE(GestureConfig::gestureKeys().size(), 12);
+        QCOMPARE(GestureConfig::gestureKeys().first(), QStringLiteral("Swipe3Up"));
+        QCOMPARE(GestureConfig::gestureKeys().last(), QStringLiteral("Pinch3Out"));
+    }
+
+    void ruleKeysOverrides()
+    {
+        const QMap<QString, QString> o{{QStringLiteral("Swipe3Down.Overview"), QStringLiteral("inherit")},
+                                       {QStringLiteral("Pinch2In.Overview"), QStringLiteral("block")}};
+        QCOMPARE(GestureConfig::ruleKeys(QStringLiteral(".Overview"), o),
+                 (QStringList{QStringLiteral("Swipe4Down.Overview"), QStringLiteral("Pinch2In.Overview")}));
+    }
+
+    void ruleEqualToNormalIsKept()
+    {
+        // A rule doing the same as the normal gesture is still a rule.
+        const QMap<QString, QString> e{{QStringLiteral("Swipe3Left.Overview"), QStringLiteral("switcher")}};
+        QCOMPARE(GestureConfig::overrides(e), e);
+        QVERIFY(GestureConfig::ruleKeys(QStringLiteral(".Overview"), e).contains(QStringLiteral("Swipe3Left.Overview")));
+    }
+
+    void overridesDropsStrayInherit()
+    {
+        const QMap<QString, QString> e{{QStringLiteral("Swipe3Left.Overview"), QStringLiteral("inherit")},
+                                       {QStringLiteral("Swipe3Down.Overview"), QStringLiteral("inherit")}};
+        // Built-in rule deleted: kept. No built-in rule to delete: meaningless, dropped.
+        QCOMPARE(GestureConfig::overrides(e),
+                 (QMap<QString, QString>{{QStringLiteral("Swipe3Down.Overview"), QStringLiteral("inherit")}}));
+    }
+
     void canUndo()
     {
         // Only actions that run something can undo a swipe.

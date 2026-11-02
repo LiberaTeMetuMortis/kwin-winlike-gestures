@@ -164,11 +164,50 @@ QMap<QString, QString> GestureConfig::overrides(const QMap<QString, QString> &en
     builtin.insert(tuningDefaults());
     QMap<QString, QString> result;
     for (auto it = entries.cbegin(); it != entries.cend(); ++it) {
+        // "inherit" only means something where it cancels a built-in binding.
+        if (it.value().trimmed() == QLatin1String("inherit") && !builtin.contains(it.key())) {
+            continue;
+        }
         if (it.value() != builtin.value(it.key())) {
             result.insert(it.key(), it.value());
         }
     }
     return result;
+}
+
+QStringList GestureConfig::gestureKeys()
+{
+    QStringList keys;
+    for (int fingers : {3, 4}) {
+        for (Direction d : directionsOf(GestureType::Swipe)) {
+            keys << key(GestureType::Swipe, fingers, d);
+        }
+    }
+    for (int fingers : {2, 3}) {
+        for (Direction d : directionsOf(GestureType::Pinch)) {
+            keys << key(GestureType::Pinch, fingers, d);
+        }
+    }
+    return keys;
+}
+
+QStringList GestureConfig::situations()
+{
+    return {QStringLiteral(".Grid"), QStringLiteral(".Overview"), QStringLiteral(".Desktop")};
+}
+
+QStringList GestureConfig::ruleKeys(const QString &suffix, const QMap<QString, QString> &overrides)
+{
+    const QMap<QString, QString> builtin = defaults();
+    QStringList rules;
+    for (const QString &base : gestureKeys()) {
+        const QString full = base + suffix;
+        const QString value = overrides.value(full, builtin.value(full)).trimmed();
+        if (!value.isEmpty() && value != QLatin1String("inherit")) {
+            rules << full;
+        }
+    }
+    return rules;
 }
 
 void GestureConfig::load(const QMap<QString, QString> &overrides)

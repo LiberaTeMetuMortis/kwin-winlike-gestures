@@ -11,6 +11,7 @@
 #include <QHash>
 #include <QMap>
 #include <QString>
+#include <QStringList>
 
 namespace WinLike
 {
@@ -70,6 +71,14 @@ public:
     // (bindings and tuning). A state key equal to its normal gesture is kept:
     // it was set on purpose and must not start following the normal gesture.
     static QMap<QString, QString> overrides(const QMap<QString, QString> &entries);
+
+    // Every bindable gesture key, in the order the settings page lists them.
+    static QStringList gestureKeys();
+    // State suffixes, topmost (winning) first: ".Grid", ".Overview", ".Desktop".
+    static QStringList situations();
+    // The keys with this suffix that are rules, given the user's overrides:
+    // a binding (override, else built-in) that isn't "inherit". In gestureKeys() order.
+    static QStringList ruleKeys(const QString &suffix, const QMap<QString, QString> &overrides);
 
     // Applies overrides. Keys: "Threshold", "PinchThreshold", "SwitcherStep",
     // "SwitcherStepVertical", "TriggerTiming" (lift | midswipe),
