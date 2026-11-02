@@ -112,15 +112,23 @@ KCM.SimpleKCM {
         }
         RowLayout {
             Kirigami.FormData.label: i18nc("@label", "Special situations:")
-            QQC2.Label {
-                readonly property int count: (kcm.revision, kcm.ruleCount())
-                text: count > 0 ? i18ncp("@info", "%1 rule", "%1 rules", count) : i18nc("@info no conditional rules", "None")
-                enabled: kcm.pluginEnabled
-            }
-            QQC2.Button {
-                text: i18nc("@action:button", "Edit…")
-                icon.name: "document-edit"
-                onClicked: kcm.push("ConditionalGestures.qml")
+            // As wide as a gesture dropdown, so the Edit button's right edge
+            // lines up with the dropdowns above.
+            RowLayout {
+                Layout.preferredWidth: Kirigami.Units.gridUnit * 16
+                Layout.maximumWidth: Kirigami.Units.gridUnit * 16
+                spacing: Kirigami.Units.smallSpacing
+                QQC2.Label {
+                    readonly property int count: (kcm.revision, kcm.ruleCount())
+                    text: count > 0 ? i18ncp("@info", "%1 rule", "%1 rules", count) : i18nc("@info no conditional rules", "None")
+                    enabled: kcm.pluginEnabled
+                    Layout.fillWidth: true
+                }
+                QQC2.Button {
+                    text: i18nc("@action:button", "Edit…")
+                    icon.name: "document-edit"
+                    onClicked: kcm.push("ConditionalGestures.qml")
+                }
             }
             Kirigami.ContextualHelpButton {
                 toolTipText: i18nc("@info:tooltip", "Make gestures do something else while Overview or the desktop grid is open, or while the desktop is shown. A gesture without a rule there keeps its normal action.")
@@ -139,6 +147,8 @@ KCM.SimpleKCM {
                     { text: i18nc("@item:inlistbox", "Mid-swipe, after a set distance"), value: "midswipe" },
                 ]
                 enabled: kcm.pluginEnabled
+                // Same width as the gesture dropdowns.
+                Layout.preferredWidth: Kirigami.Units.gridUnit * 16
                 textRole: "text"
                 model: choices
                 currentIndex: (kcm.revision, kcm.value("TriggerTiming") === "midswipe" ? 1 : 0)
